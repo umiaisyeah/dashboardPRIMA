@@ -12,6 +12,7 @@ import {
   Home,
   Sun,
   Moon,
+  Database,
 } from 'lucide-react';
 import { VerificationResult, DocumentPackage } from '../types';
 import { downloadVerificationExcel } from '../services/excelGenerator';
@@ -31,6 +32,8 @@ interface HeaderProps {
   onOpenWelcome?: () => void;
   onOpenGoogleDrive?: () => void;
   googleUser?: { displayName?: string | null; email?: string | null; photoURL?: string | null } | null;
+  onOpenSupabase?: () => void;
+  isSupabaseConnected?: boolean;
   isProcessing: boolean;
   darkMode: boolean;
   onToggleDarkMode: () => void;
@@ -46,6 +49,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenWelcome,
   onOpenGoogleDrive,
   googleUser,
+  onOpenSupabase,
+  isSupabaseConnected = true,
   isProcessing,
   darkMode,
   onToggleDarkMode,
@@ -176,6 +181,25 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Cloud className={`w-3.5 h-3.5 ${googleUser ? 'text-emerald-600' : 'text-blue-600'}`} />
                 <span>Drive</span>
+              </button>
+            )}
+
+            {/* Supabase Cloud Database Button */}
+            {onOpenSupabase && (
+              <button
+                id="btn-open-supabase"
+                type="button"
+                onClick={onOpenSupabase}
+                title="Kelola Supabase PostgreSQL Cloud Database & Realtime Sync"
+                className={`inline-flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  isSupabaseConnected
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <Database className={`w-3.5 h-3.5 ${isSupabaseConnected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}`} />
+                <span className="hidden md:inline">Supabase</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${isSupabaseConnected ? 'bg-emerald-500' : 'bg-slate-400'}`} />
               </button>
             )}
 

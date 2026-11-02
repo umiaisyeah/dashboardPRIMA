@@ -54,6 +54,8 @@ import { DocumentPackageBar } from './components/DocumentPackageBar';
 import { ResetModal } from './components/ResetModal';
 import { DeletePackageModal } from './components/DeletePackageModal';
 import { GoogleDriveModal } from './components/GoogleDriveModal';
+import { SupabaseSyncModal } from './components/SupabaseSyncModal';
+import { saveSinglePackageToSupabase, deletePackageFromSupabase } from './services/supabaseService';
 import { User } from 'firebase/auth';
 import { initAuth, googleSignIn, googleSignOut } from './services/googleDriveAuth';
 
@@ -208,6 +210,16 @@ export default function App() {
   const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(null);
   const [showGoogleDriveModal, setShowGoogleDriveModal] = useState<boolean>(false);
 
+  // Supabase Cloud Integration State
+  const [showSupabaseModal, setShowSupabaseModal] = useState<boolean>(false);
+  const [isSupabaseAutoSync, setIsSupabaseAutoSync] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('prima_supabase_autosync') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
   // Listen to Google OAuth state
   useEffect(() => {
     const unsubscribe = initAuth(
@@ -318,6 +330,13 @@ export default function App() {
       setPackages((prev) => [...prev, newPkg]);
       setActivePackageId(newPackageId);
       setActiveTab('dashboard');
+
+      // Sync to Supabase cloud in background if auto-sync enabled
+      if (isSupabaseAutoSync) {
+        saveSinglePackageToSupabase(newPkg).catch((e) =>
+          console.info('Supabase auto-sync note:', e)
+        );
+      }
     } catch (err: any) {
       console.error('Pipeline execution error:', err);
       setPipelineError(
@@ -368,6 +387,7 @@ export default function App() {
 
   const handleDeletePackage = async (pkgId: string) => {
     await removePackageFromStorage(pkgId);
+    deletePackageFromSupabase(pkgId).catch(() => {});
     setPackages((prev) => {
       const updated = prev.filter((p) => p.id !== pkgId);
       persistAllPackages(updated);
@@ -504,6 +524,8 @@ export default function App() {
         onOpenWelcome={() => setCurrentView('welcome')}
         onOpenGoogleDrive={() => setShowGoogleDriveModal(true)}
         googleUser={googleUser}
+        onOpenSupabase={() => setShowSupabaseModal(true)}
+        isSupabaseConnected={true}
         isProcessing={isProcessing}
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
@@ -902,6 +924,28 @@ export default function App() {
           onLogout={handleGoogleLogout}
           onImportFromDrive={handleImportFromDrive}
           onClose={() => setShowGoogleDriveModal(false)}
+        />
+      )}
+
+      {showSupabaseModal && (
+        <SupabaseSyncModal
+          isOpen={showSupabaseModal}
+          onClose={() => setShowSupabaseModal(false)}
+          localPackages={packages}
+          onPackagesUpdated={(newPkgs) => {
+            setPackages(newPkgs);
+            persistAllPackages(newPkgs);
+            if (newPkgs.length > 0) {
+              setActivePackageId(newPkgs[0].id);
+            }
+          }}
+          autoSync={isSupabaseAutoSync}
+          onToggleAutoSync={(enabled) => {
+            setIsSupabaseAutoSync(enabled);
+            try {
+              localStorage.setItem('prima_supabase_autosync', String(enabled));
+            } catch {}
+          }}
         />
       )}
     </div>

@@ -310,6 +310,8 @@ export interface RawBaplPage {
   doc_rank?: number;
   is_latest_doc?: boolean;
   detected_ink_colors?: string[]; // e.g. ['Tinta Biru', 'Tinta Merah', 'Tinta Hitam']
+  extraction_source?: 'text_layer' | 'cloud_ai' | 'tesseract' | 'cache';
+  file_hash?: string;
   handwritten_sections?: Array<{
     text: string;
     ink_color?: string;

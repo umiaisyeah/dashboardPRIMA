@@ -7,6 +7,11 @@ import {
   Search,
   ShieldCheck,
   Layers,
+  Sparkles,
+  Database,
+  Cpu,
+  AlertTriangle,
+  Info,
 } from 'lucide-react';
 import { RawBaplPage } from '../types';
 
@@ -14,6 +19,99 @@ interface RawBaplViewProps {
   pages: RawBaplPage[];
   initialPage?: number;
 }
+
+export type ExtractionMethod = 'text_layer' | 'cloud_ai' | 'tesseract' | 'cache';
+
+export interface SourceMeta {
+  type: ExtractionMethod;
+  name: string;
+  shortLabel: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor: string;
+  badgeBg: string;
+  badgeBorder: string;
+  textColor: string;
+  accuracyRate: string;
+  tooltip: string;
+  accuracyImplication: string;
+}
+
+export const SOURCE_META: Record<ExtractionMethod, SourceMeta> = {
+  text_layer: {
+    type: 'text_layer',
+    name: 'Text Layer (PDF Digital)',
+    shortLabel: 'Text Layer',
+    icon: FileText,
+    iconColor: 'text-sky-500 dark:text-sky-400',
+    badgeBg: 'bg-sky-50 dark:bg-sky-950/70',
+    badgeBorder: 'border-sky-200 dark:border-sky-800',
+    textColor: 'text-sky-700 dark:text-sky-300',
+    accuracyRate: '~100% (Sempurna)',
+    tooltip: 'Teks diekstrak langsung dari layer vektor digital PDF tanpa proses pemindaian gambar.',
+    accuracyImplication: 'Akurasi sempurna dan bebas dari distorsi optik. Angka, tanda baca, dan format tabel terjaga 100% sesuai naskah asli.',
+  },
+  cloud_ai: {
+    type: 'cloud_ai',
+    name: 'Cloud AI Vision (Gemini)',
+    shortLabel: 'Cloud AI',
+    icon: Sparkles,
+    iconColor: 'text-indigo-500 dark:text-indigo-400',
+    badgeBg: 'bg-indigo-50 dark:bg-indigo-950/70',
+    badgeBorder: 'border-indigo-200 dark:border-indigo-800',
+    textColor: 'text-indigo-700 dark:text-indigo-300',
+    accuracyRate: '95% – 99% (Sangat Tinggi)',
+    tooltip: 'Dipindai dengan model Multimodal Cloud AI Vision untuk tabel rumit, cap stempel, dan tulisan tangan.',
+    accuracyImplication: 'Mampu merekonstruksi tabel teknis kompleks, mengenali catatan tinta basah/tulisan tangan, dan memisahkan teks dari cap stempel tumpang tindih.',
+  },
+  cache: {
+    type: 'cache',
+    name: 'Supabase SHA-256 Cache',
+    shortLabel: 'Cache',
+    icon: Database,
+    iconColor: 'text-emerald-500 dark:text-emerald-400',
+    badgeBg: 'bg-emerald-50 dark:bg-emerald-950/70',
+    badgeBorder: 'border-emerald-200 dark:border-emerald-800',
+    textColor: 'text-emerald-700 dark:text-emerald-300',
+    accuracyRate: 'Identik (Tersimpan)',
+    tooltip: 'Hasil pemindaian diverifikasi melalui sidik jari SHA-256 dan dimuat seketika tanpa kuota.',
+    accuracyImplication: 'Memuat data hasil pemrosesan terdahulu yang telah diverifikasi hash SHA-256 tanpa deviasi karakter.',
+  },
+  tesseract: {
+    type: 'tesseract',
+    name: 'Tesseract OCR Lokal',
+    shortLabel: 'Tesseract',
+    icon: Cpu,
+    iconColor: 'text-amber-500 dark:text-amber-400',
+    badgeBg: 'bg-amber-50 dark:bg-amber-950/70',
+    badgeBorder: 'border-amber-200 dark:border-amber-800',
+    textColor: 'text-amber-800 dark:text-amber-300',
+    accuracyRate: '70% – 85% (Cadangan/Terbatas)',
+    tooltip: 'OCR lokal fallback saat batas kuota API tercapai. Akurasi lebih rendah pada tabel dan tulisan tangan.',
+    accuracyImplication: 'Peringatan Akurasi: Pemindaian OCR lokal berbasis pola piksel. Tabel tanpa garis tegas, angka tipis, tanda baca desimal, stempel basah, dan tulisan tangan paraf berpotensi mengalami salah baca atau pembulatan karakter. Disarankan verifikasi manual untuk angka bernilai signifikan.',
+  },
+};
+
+const getSourceMeta = (source?: string): SourceMeta => {
+  if (source && source in SOURCE_META) {
+    return SOURCE_META[source as ExtractionMethod];
+  }
+  return SOURCE_META.cloud_ai;
+};
+
+const renderSourceBadge = (source?: 'text_layer' | 'cloud_ai' | 'tesseract' | 'cache') => {
+  const meta = getSourceMeta(source);
+  const Icon = meta.icon;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${meta.badgeBg} ${meta.textColor} ${meta.badgeBorder}`}
+      title={`${meta.name}: ${meta.tooltip}`}
+    >
+      <Icon className={`w-3.5 h-3.5 ${meta.iconColor}`} />
+      <span>{meta.shortLabel}</span>
+      <span className="text-[10px] opacity-75 font-normal">({meta.accuracyRate})</span>
+    </span>
+  );
+};
 
 export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1 }) => {
   const [selectedPageKey, setSelectedPageKey] = useState<string>('');
@@ -204,34 +302,133 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
           </div>
         </div>
 
-        {/* Page Selector Strip */}
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
-          {filteredPages.map((p, idx) => {
-            const key = getPageKey(p, idx);
-            const isSelected = key === selectedPageKey;
-            const pct = Math.round(p.ocr_confidence * 100);
+        {/* Page Selector Strip with Status Icons */}
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Pilih Halaman Dokumen &amp; Status Metode Ekstraksi
+            </span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">
+              Arahkan kursor ke ikon untuk melihat detail akurasi
+            </span>
+          </div>
 
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setSelectedPageKey(key)}
-                className={`px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all border flex items-center gap-2 ${
-                  isSelected
-                    ? 'border-[#0054a6] dark:border-cyan-400 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/70 dark:to-cyan-950/70 text-[#004690] dark:text-cyan-200 shadow-xs'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
-                }`}
-              >
-                <span>Hal. {p.page}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">
-                  {pct}%
-                </span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-400 max-w-[110px] truncate">
-                  {p.source || 'BAPL'}
-                </span>
-              </button>
-            );
-          })}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {filteredPages.map((p, idx) => {
+              const key = getPageKey(p, idx);
+              const isSelected = key === selectedPageKey;
+              const pct = Math.round(p.ocr_confidence * 100);
+              const meta = getSourceMeta(p.extraction_source);
+              const Icon = meta.icon;
+
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelectedPageKey(key)}
+                  title={`Halaman ${p.page} (${p.source || 'BAPL'}) - Metode: ${meta.name}\n${meta.accuracyImplication}`}
+                  className={`group relative px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all border flex items-center gap-2 ${
+                    isSelected
+                      ? 'border-[#0054a6] dark:border-cyan-400 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/70 dark:to-cyan-950/70 text-[#004690] dark:text-cyan-200 shadow-xs'
+                      : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                  }`}
+                >
+                  {/* Page number with small status icon right next to it */}
+                  <span className="flex items-center gap-1.5 font-bold">
+                    <span>Hal. {p.page}</span>
+                    <span
+                      className={`inline-flex items-center justify-center p-0.5 rounded ${
+                        p.extraction_source === 'tesseract'
+                          ? 'bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400 ring-1 ring-amber-300 dark:ring-amber-700'
+                          : p.extraction_source === 'text_layer'
+                          ? 'bg-sky-100 dark:bg-sky-900/60 text-sky-600 dark:text-sky-400'
+                          : p.extraction_source === 'cache'
+                          ? 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400'
+                      }`}
+                      title={`${meta.name}: ${meta.tooltip}`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                    </span>
+                  </span>
+
+                  {/* Extraction Source Short Badge */}
+                  <span
+                    className={`text-[9px] px-1.5 py-0.5 rounded font-medium border ${meta.badgeBg} ${meta.textColor} ${meta.badgeBorder}`}
+                  >
+                    {meta.shortLabel}
+                  </span>
+
+                  {/* Confidence percentage */}
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">
+                    {pct}%
+                  </span>
+
+                  {/* Source doc abbreviation */}
+                  <span className="text-[10px] text-slate-400 dark:text-slate-400 max-w-[90px] truncate">
+                    {p.source || 'BAPL'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Footnote / Accuracy Implications Legend */}
+        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 rounded-xl p-3.5">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">
+            <Info className="w-4 h-4 text-[#0054a6] dark:text-[#38bdf8]" />
+            <span>Catatan Panduan Metode Ekstraksi &amp; Implikasi Akurasi OCR:</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            {/* Text Layer */}
+            <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-900/60">
+              <div className="flex items-center gap-1.5 font-bold text-sky-700 dark:text-sky-300">
+                <FileText className="w-3.5 h-3.5 text-sky-500" />
+                <span>Text Layer (Digital)</span>
+                <span className="text-[10px] text-sky-600 dark:text-sky-400 font-normal">~100%</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
+                Diekstrak langsung dari data PDF asli. Nilai angka dan teks presisi tanpa deviasi optik.
+              </p>
+            </div>
+
+            {/* Cloud AI Vision */}
+            <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60">
+              <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                <span>Cloud AI Vision</span>
+                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal">95–99%</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
+                Multimodal AI mutakhir. Optimal untuk tabel teknis padat, stempel basah, dan tulisan tangan.
+              </p>
+            </div>
+
+            {/* Cache Supabase */}
+            <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-300">
+                <Database className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Cache SHA-256</span>
+                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">Identik</span>
+              </div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
+                Hasil verifikasi hash terdahulu yang dimuat instan tanpa menggunakan kuota tambahan.
+              </p>
+            </div>
+
+            {/* Tesseract OCR Lokal */}
+            <div className="p-2.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800">
+              <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-200">
+                <Cpu className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Tesseract (Lokal)</span>
+                <span className="text-[10px] text-amber-700 dark:text-amber-300 font-normal">70–85%</span>
+              </div>
+              <p className="text-[11px] text-amber-900/90 dark:text-amber-200/90 mt-1 leading-snug">
+                <strong>Implikasi Akurasi:</strong> Fallback cadangan saat kuota habis. Tulisan tangan, cap tumpang tindih, dan tabel rapat berpotensi mengalami salah baca karakter.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -240,7 +437,7 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col transition-colors">
           {/* Top Info Banner */}
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
                 <Layers className="w-4 h-4 text-[#0054a6] dark:text-[#38bdf8]" />
                 Dokumen: {activePage.source || 'BAPL Utama'}
@@ -249,6 +446,7 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
               <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 font-mono">
                 Halaman {activePage.page}
               </span>
+              {renderSourceBadge(activePage.extraction_source)}
             </div>
 
             <div className="flex items-center gap-3">
@@ -260,6 +458,26 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
               </div>
             </div>
           </div>
+
+          {/* Warning Banner & Accuracy Implication for Local Tesseract Fallback */}
+          {activePage.extraction_source === 'tesseract' && (
+            <div className="px-6 py-3.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/70 dark:to-orange-950/50 border-b border-amber-200 dark:border-amber-900/80 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                    Dibaca dengan OCR lokal (Tesseract Fallback)
+                  </span>
+                  <span className="text-[10px] px-2 py-0.2 rounded-full font-semibold bg-amber-200/70 dark:bg-amber-900 text-amber-900 dark:text-amber-200">
+                    Akurasi Terbatas
+                  </span>
+                </div>
+                <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                  <strong>Implikasi Akurasi:</strong> Halaman ini diekstrak menggunakan mesin Tesseract lokal karena batas kuota Cloud AI atau kendala konektivitas. Tulisan tangan paraf, cap stempel berbayang, tanda desimal koma/titik, serta tabel rapat dapat memiliki tingkat akurasi lebih rendah. Harap periksa kembali angka volume dan nominal pada halaman ini secara saksama.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Search Result Counter */}
           {searchTerm && (

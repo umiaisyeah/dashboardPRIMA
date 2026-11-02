@@ -60,33 +60,33 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
   return (
     <div className="space-y-6">
       {/* Header & Filter Controls */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-blue-600" />
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-blue-600 dark:text-[#00aded]" />
                 Verifikasi Teknis (Khusus Approval JusTek)
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                Pilar Approval JusTek (Fisik & Spesifikasi)
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950/70 text-blue-800 dark:text-cyan-300 border border-blue-200 dark:border-blue-800">
+                Pilar Approval JusTek (Fisik &amp; Spesifikasi)
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Fokus eksklusif untuk <strong className="text-blue-700">Approval Justifikasi Teknis (JusTek)</strong>: Memverifikasi kesesuaian fisik terpasang dalam BAPL terhadap klausul usulan teknis (spesifikasi, material, dimensi). Tidak dicampur dengan audit finansial.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Fokus eksklusif untuk <strong className="text-blue-700 dark:text-[#00aded]">Approval Justifikasi Teknis (JusTek)</strong>: Memverifikasi kesesuaian fisik terpasang dalam BAPL terhadap klausul usulan teknis (spesifikasi, material, dimensi). Tidak dicampur dengan audit finansial.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Scope Filter Toggle (Changed vs All) */}
-            <div className="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold">
+            <div className="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5 text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setScopeFilter('changed_only')}
                 className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
                   scopeFilter === 'changed_only'
-                    ? 'bg-white text-blue-700 shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-[#00aded] shadow-xs font-bold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Hanya Item Berubah ({changedCount})
@@ -96,8 +96,8 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                 onClick={() => setScopeFilter('all')}
                 className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
                   scopeFilter === 'all'
-                    ? 'bg-white text-blue-700 shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-[#00aded] shadow-xs font-bold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Semua Item ({changes.length})
@@ -112,7 +112,7 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                 placeholder="Cari item, ID, klaim..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-lg text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 w-36 sm:w-48"
+                className="pl-8 pr-3 py-1.5 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500 w-36 sm:w-48"
               />
             </div>
 
@@ -120,7 +120,7 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="py-1.5 px-3 rounded-lg text-xs bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium text-slate-700 cursor-pointer"
+              className="py-1.5 px-3 rounded-lg text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium text-slate-700 dark:text-slate-200 cursor-pointer"
             >
               <option value="ALL">Semua Status</option>
               <option value="VERIFIED">VERIFIED</option>
@@ -134,11 +134,11 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
       </div>
 
       {/* Main Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+              <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider text-[10px]">
                 <th className="py-3.5 px-4 w-24">Change ID</th>
                 <th className="py-3.5 px-4 min-w-44">Item Pekerjaan</th>
                 <th className="py-3.5 px-4 min-w-48">Baseline (RAB Awal)</th>
@@ -150,30 +150,30 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                 <th className="py-3.5 px-3 w-16 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {filtered.map((item, idx) => (
                 <tr
                   key={`${item.change_id}_${idx}`}
-                  className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                  className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer"
                   onClick={() => setSelectedChange(item)}
                 >
-                  <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                  <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
                     {item.change_id}
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className="font-semibold text-slate-900 block">{item.item}</span>
+                    <span className="font-semibold text-slate-900 dark:text-white block">{item.item}</span>
                     <div className="flex flex-wrap items-center gap-1 mt-0.5">
-                      <span className="inline-flex items-center gap-1 text-[10px] text-slate-500">
+                      <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
                         <Tag className="w-2.5 h-2.5 text-slate-400" />
                         {item.category}
                       </span>
                       {item.superseded_info && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300" title={item.superseded_info}>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800" title={item.superseded_info}>
                           Diperbarui Dok. Terbaru
                         </span>
                       )}
                       {item.multi_evidence && item.multi_evidence.length > 1 && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                           {item.multi_evidence.length} Dokumen Bukti
                         </span>
                       )}
@@ -184,7 +184,7 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                         {item.sub_specs_differences.map((diff, sIdx) => (
                           <span
                             key={sIdx}
-                            className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-semibold bg-indigo-50 text-indigo-900 border border-indigo-200"
+                            className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-semibold bg-indigo-50 dark:bg-indigo-950/70 text-indigo-900 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800"
                             title="Perubahan sub-spesifikasi tertulis di bawah item"
                           >
                             {diff}
@@ -193,22 +193,22 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                       </div>
                     )}
                   </td>
-                  <td className="py-3.5 px-4 text-slate-600 text-[11px] leading-relaxed">
+                  <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
                     {item.baseline}
                   </td>
-                  <td className="py-3.5 px-4 font-medium text-slate-800 text-[11px] leading-relaxed bg-slate-50/50">
+                  <td className="py-3.5 px-4 font-medium text-slate-800 dark:text-slate-100 text-[11px] leading-relaxed bg-slate-50/50 dark:bg-slate-800/30">
                     {item.actual_bapl}
                   </td>
-                  <td className="py-3.5 px-4 text-slate-700 text-[11px] leading-relaxed">
+                  <td className="py-3.5 px-4 text-slate-700 dark:text-slate-300 text-[11px] leading-relaxed">
                     {item.proposed}
                   </td>
                   <td className="py-3.5 px-3 text-center">
                     {item.match ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300">
                         MATCH
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300">
                         DIFF
                       </span>
                     )}
@@ -267,61 +267,61 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
 
       {/* Detail Modal for Selected Change */}
       {selectedChange && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200">
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 dark:border-slate-800 transition-colors">
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-900 text-white">
+                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-900 dark:bg-slate-800 text-white border border-slate-700">
                     {selectedChange.change_id}
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                     Kategori: {selectedChange.category}
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">{selectedChange.item}</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{selectedChange.item}</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedChange(null)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-4 py-4 text-xs">
-              <div className="grid grid-cols-2 gap-4 bg-slate-50 p-3.5 rounded-xl">
+              <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/70 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div>
-                  <span className="text-slate-400 block font-semibold">Kondisi Awal (Baseline)</span>
-                  <span className="text-slate-900 font-medium mt-0.5 block">
+                  <span className="text-slate-500 dark:text-slate-400 block font-semibold">Kondisi Awal (Baseline)</span>
+                  <span className="text-slate-900 dark:text-slate-100 font-medium mt-0.5 block">
                     {selectedChange.baseline}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block font-semibold">Usulan JusTek (Proposed)</span>
-                  <span className="text-blue-700 font-medium mt-0.5 block">
+                  <span className="text-slate-500 dark:text-slate-400 block font-semibold">Usulan JusTek (Proposed)</span>
+                  <span className="text-blue-700 dark:text-cyan-300 font-medium mt-0.5 block">
                     {selectedChange.proposed}
                   </span>
                 </div>
               </div>
 
               {selectedChange.superseded_info && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-blue-950 text-xs">
-                  <div className="flex items-center gap-1.5 font-bold mb-1 text-blue-950">
-                    <Clock className="w-4 h-4 text-blue-600" />
+                <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-xl p-3 text-blue-950 dark:text-blue-200 text-xs">
+                  <div className="flex items-center gap-1.5 font-bold mb-1 text-blue-950 dark:text-blue-200">
+                    <Clock className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                     <span>Konfirmasi Multi-Dokumen (Pemeriksaan Lintas Berkas)</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-blue-900">{selectedChange.superseded_info}</p>
+                  <p className="text-[11px] leading-relaxed text-blue-900 dark:text-blue-300">{selectedChange.superseded_info}</p>
                   {selectedChange.revision_history && selectedChange.revision_history.length > 1 && (
-                    <div className="mt-2.5 pt-2 border-t border-blue-200/70 space-y-1">
-                      <span className="font-semibold text-[10px] uppercase tracking-wider text-blue-950 block">
+                    <div className="mt-2.5 pt-2 border-t border-blue-200/70 dark:border-blue-800/70 space-y-1">
+                      <span className="font-semibold text-[10px] uppercase tracking-wider text-blue-950 dark:text-blue-200 block">
                         Daftar Berkas Pembuktian Terkait:
                       </span>
                       {selectedChange.revision_history.map((rev, rIdx) => (
-                        <div key={rIdx} className="flex items-center justify-between text-[11px] bg-white px-2.5 py-1 rounded border border-blue-100">
-                          <span className="truncate max-w-[380px] text-slate-800">{rev.source_document} (Hal {rev.page}): {rev.statement}</span>
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-800">
+                        <div key={rIdx} className="flex items-center justify-between text-[11px] bg-white dark:bg-slate-800 px-2.5 py-1 rounded border border-blue-100 dark:border-blue-900">
+                          <span className="truncate max-w-[380px] text-slate-800 dark:text-slate-200">{rev.source_document} (Hal {rev.page}): {rev.statement}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 dark:bg-blue-900/60 text-blue-800 dark:text-cyan-300">
                             Terverifikasi
                           </span>
                         </div>
@@ -334,23 +334,23 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
               {/* Fakta Fisik & Tipe Bukti */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-700 font-bold block">
+                  <span className="text-slate-700 dark:text-slate-300 font-bold block">
                     Fakta Lapangan &amp; Bukti Fisik (Actual)
                   </span>
                   {selectedChange.evidence_found && selectedChange.evidence_type === 'EXPLICIT' && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" />
                       BUKTI EKSPLISIT (Tertulis Langsung)
                     </span>
                   )}
                   {selectedChange.evidence_found && selectedChange.evidence_type === 'IMPLICIT' && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800 flex items-center gap-1">
                       <HelpCircle className="w-3 h-3" />
                       BUKTI IMPLISIT (Deduksi Rekayasa)
                     </span>
                   )}
                   {(!selectedChange.evidence_found || selectedChange.evidence_type === 'NONE') && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
                       TIDAK ADA BUKTI (Di Seluruh Dokumen)
                     </span>
@@ -358,8 +358,8 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                 </div>
                 <div className={`rounded-xl p-3.5 font-medium leading-relaxed text-xs sm:text-sm border ${
                   selectedChange.evidence_found
-                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
-                    : 'bg-rose-50/70 border-rose-200 text-rose-950'
+                    ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-950 dark:text-emerald-200'
+                    : 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800 text-rose-950 dark:text-rose-200'
                 }`}>
                   <HighlightedText
                     text={selectedChange.actual_bapl}
@@ -370,12 +370,12 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
 
               {/* Rationale Deduksi Rekayasa (Khusus Bukti Implisit) */}
               {selectedChange.implicit_rationale && (
-                <div className="bg-amber-50/90 border border-amber-200 rounded-xl p-3.5 space-y-1.5 shadow-2xs">
-                  <div className="flex items-center gap-1.5 text-amber-900 font-bold text-xs">
-                    <HelpCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <div className="bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-xl p-3.5 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center gap-1.5 text-amber-900 dark:text-amber-300 font-bold text-xs">
+                    <HelpCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     <span>Uraian Mengapa Klausul Ini Menjadi Bukti (Alasan Teknis / Deduksi Implisit):</span>
                   </div>
-                  <p className="text-xs text-amber-950 font-normal leading-relaxed pl-5">
+                  <p className="text-xs text-amber-950 dark:text-amber-200 font-normal leading-relaxed pl-5">
                     <HighlightedText
                       text={selectedChange.implicit_rationale}
                       matchTarget={[selectedChange.item, selectedChange.proposed, selectedChange.baseline, selectedChange.actual_bapl]}
@@ -386,20 +386,20 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
 
               {/* Sub-spesifikasi yang tertulis di bawahnya */}
               {selectedChange.sub_specs_differences && selectedChange.sub_specs_differences.length > 0 && (
-                <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3.5 space-y-2">
-                  <span className="text-indigo-950 font-bold text-xs uppercase tracking-wider block">
+                <div className="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl p-3.5 space-y-2">
+                  <span className="text-indigo-950 dark:text-indigo-200 font-bold text-xs uppercase tracking-wider block">
                     Perubahan Sub-Spesifikasi Tertulis di Baris Bawah:
                   </span>
                   <div className="space-y-1 font-mono text-[11px]">
                     {selectedChange.sub_specs_differences.map((diff, sIdx) => (
-                      <div key={sIdx} className="bg-white p-2 rounded-lg border border-indigo-100 text-indigo-950 flex items-center justify-between">
+                      <div key={sIdx} className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-indigo-100 dark:border-indigo-900 text-indigo-950 dark:text-indigo-200 flex items-center justify-between">
                         <span>
                           <HighlightedText
                             text={diff}
                             matchTarget={[selectedChange.item, selectedChange.actual_bapl]}
                           />
                         </span>
-                        <span className="text-[10px] font-sans px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 font-semibold">Tervalidasi Bukti</span>
+                        <span className="text-[10px] font-sans px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-300 font-semibold">Tervalidasi Bukti</span>
                       </div>
                     ))}
                   </div>
@@ -408,36 +408,36 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
 
               {/* Multi-Document Corroboration (Daftar Dokumen Yang Memberikan Bukti) */}
               {selectedChange.multi_evidence && selectedChange.multi_evidence.length > 0 && (
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
+                <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl p-3.5 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-900 font-bold text-xs uppercase tracking-wider block">
+                    <span className="text-slate-900 dark:text-slate-100 font-bold text-xs uppercase tracking-wider block">
                       Daftar Dokumen Yang Memberikan Bukti ({selectedChange.multi_evidence.length} Berkas):
                     </span>
-                    <span className="text-[10px] text-slate-500 font-mono font-semibold">Lintas Berkas Kolom 1</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono font-semibold">Lintas Berkas Kolom 1</span>
                   </div>
                   <div className="space-y-2">
                     {selectedChange.multi_evidence.map((ev, eIdx) => {
-                      let typeBadge = 'bg-blue-100 text-blue-900 border-blue-300';
-                      if (ev.doc_type.includes('FAT')) typeBadge = 'bg-amber-100 text-amber-900 border-amber-300';
-                      else if (ev.doc_type.includes('MC-0') || ev.doc_type.includes('MC-100')) typeBadge = 'bg-teal-100 text-teal-900 border-teal-300';
-                      else if (ev.doc_type.includes('VOLUME')) typeBadge = 'bg-emerald-100 text-emerald-900 border-emerald-300';
-                      else if (ev.doc_type.includes('TEST')) typeBadge = 'bg-purple-100 text-purple-900 border-purple-300';
+                      let typeBadge = 'bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-950/70 dark:text-cyan-300 dark:border-blue-800';
+                      if (ev.doc_type.includes('FAT')) typeBadge = 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800';
+                      else if (ev.doc_type.includes('MC-0') || ev.doc_type.includes('MC-100')) typeBadge = 'bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-950/70 dark:text-teal-300 dark:border-teal-800';
+                      else if (ev.doc_type.includes('VOLUME')) typeBadge = 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800';
+                      else if (ev.doc_type.includes('TEST')) typeBadge = 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800';
 
                       return (
-                        <div key={eIdx} className="bg-white p-3 rounded-lg border border-slate-200 shadow-2xs space-y-1.5">
+                        <div key={eIdx} className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs space-y-1.5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5 min-w-0">
                               <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${typeBadge}`}>
                                 {ev.doc_type}
                               </span>
-                              <span className="font-semibold text-slate-900 truncate text-xs">
+                              <span className="font-semibold text-slate-900 dark:text-white truncate text-xs">
                                 {ev.doc_name} (Halaman {ev.page})
                               </span>
                             </div>
                             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                               ev.is_explicit
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                                : 'bg-amber-50 text-amber-800 border-amber-200'
+                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                : 'bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                             }`}>
                               {ev.is_explicit ? 'Bukti Eksplisit' : 'Bukti Implisit'}
                             </span>
@@ -452,7 +452,7 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
                             &quot;
                           </div>
                           {ev.explanation && (
-                            <p className="text-[10.5px] text-amber-900 font-medium italic pt-0.5">
+                            <p className="text-[10.5px] text-amber-900 dark:text-amber-300 font-medium italic pt-0.5">
                               <HighlightedText
                                 text={ev.explanation}
                                 matchTarget={[selectedChange.item, selectedChange.proposed, selectedChange.baseline]}
@@ -470,10 +470,10 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
               {(!selectedChange.multi_evidence || selectedChange.multi_evidence.length === 0) && selectedChange.evidence_snippet && (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-slate-700 font-bold block">
+                    <span className="text-slate-700 dark:text-slate-300 font-bold block">
                       Kutipan Evidence Dokumen Pembuktian (Halaman {selectedChange.evidence_page || 'Temuan'})
                     </span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-mono font-semibold">
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded font-mono font-semibold">
                       Teks Otentik Lengkap
                     </span>
                   </div>
@@ -491,64 +491,64 @@ export const TechnicalVerificationView: React.FC<TechnicalVerificationViewProps>
 
               {/* Analisis Korelasi Implisit & Rekayasa BAPL / FAT / Volume -> JusTek -> JusFin */}
               {selectedChange.implicit_correlation_analysis && (
-                <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 border border-blue-200 rounded-xl p-3.5 space-y-1.5 shadow-2xs">
-                  <div className="flex items-center space-x-1.5 text-blue-900 font-bold text-xs">
-                    <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                <div className="bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-950/50 dark:to-indigo-950/50 border border-blue-200 dark:border-blue-800 rounded-xl p-3.5 space-y-1.5 shadow-2xs">
+                  <div className="flex items-center space-x-1.5 text-blue-900 dark:text-blue-200 font-bold text-xs">
+                    <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
                     <span>Analisis Korelasi Rekayasa &amp; Deduksi Implisit (Bukti Lapangan/FAT/Volume ➔ JusTek ➔ JusFin):</span>
                   </div>
-                  <p className="text-xs text-blue-950 font-normal leading-relaxed">
+                  <p className="text-xs text-blue-950 dark:text-blue-200 font-normal leading-relaxed">
                     {selectedChange.implicit_correlation_analysis}
                   </p>
                 </div>
               )}
 
               {/* Justification Structure: Cause, Risk, Benefit */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <span className="font-bold text-slate-900 uppercase text-[10px] tracking-wider block">
+              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="font-bold text-slate-900 dark:text-white uppercase text-[10px] tracking-wider block">
                   Struktur Justifikasi Teknis (JusTek)
                 </span>
                 <div className="space-y-1.5">
-                  <p className="text-slate-700">
-                    <strong className="text-slate-900">Alasan Teknis (Cause): </strong>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white">Alasan Teknis (Cause): </strong>
                     {selectedChange.cause}
                   </p>
-                  <p className="text-slate-700">
-                    <strong className="text-slate-900">Risiko Bila Tidak Dilakukan (Risk): </strong>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white">Risiko Bila Tidak Dilakukan (Risk): </strong>
                     {selectedChange.risk}
                   </p>
-                  <p className="text-slate-700">
-                    <strong className="text-slate-900">Manfaat Perubahan (Benefit): </strong>
+                  <p className="text-slate-700 dark:text-slate-300">
+                    <strong className="text-slate-900 dark:text-white">Manfaat Perubahan (Benefit): </strong>
                     {selectedChange.benefit}
                   </p>
                 </div>
               </div>
 
               {/* Confidence & Status */}
-              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center font-mono">
-                <div className="bg-slate-50 p-2 rounded-lg">
+              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 text-center font-mono">
+                <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">OCR Conf.</span>
-                  <span className="font-bold text-slate-800">
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
                     {Math.round(selectedChange.ocr_confidence * 100)}%
                   </span>
                 </div>
-                <div className="bg-slate-50 p-2 rounded-lg">
+                <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">Matching Conf.</span>
-                  <span className="font-bold text-slate-800">
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
                     {Math.round(selectedChange.matching_confidence * 100)}%
                   </span>
                 </div>
-                <div className="bg-slate-50 p-2 rounded-lg">
+                <div className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
                   <span className="text-[10px] text-slate-400 block">Status Akhir</span>
                   <StatusBadge status={selectedChange.final_status} />
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex justify-end">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
               <button
                 type="button"
                 onClick={() => setSelectedChange(null)}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800"
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 dark:bg-blue-600 text-white hover:bg-slate-800 dark:hover:bg-blue-500 cursor-pointer"
               >
                 Tutup
               </button>
@@ -564,42 +564,42 @@ export const StatusBadge: React.FC<{ status: VerificationStatus }> = ({ status }
   switch (status) {
     case 'VERIFIED':
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-          <CheckCircle2 className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+          <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
           VERIFIED
         </span>
       );
     case 'MISMATCH':
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-          <AlertCircle className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+          <AlertCircle className="w-3 h-3 text-rose-600 dark:text-rose-400" />
           MISMATCH
         </span>
       );
     case 'NOT FOUND':
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-          <HelpCircle className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+          <HelpCircle className="w-3 h-3 text-amber-600 dark:text-amber-400" />
           NOT FOUND
         </span>
       );
     case 'NEED SUPPORT':
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-          <HelpCircle className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-950/70 text-blue-800 dark:text-cyan-300 border border-blue-200 dark:border-blue-800">
+          <HelpCircle className="w-3 h-3 text-blue-600 dark:text-cyan-400" />
           NEED SUPPORT
         </span>
       );
     case 'REVIEW':
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
-          <Clock className="w-3 h-3" />
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 dark:bg-purple-950/70 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+          <Clock className="w-3 h-3 text-purple-600 dark:text-purple-400" />
           REVIEW
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
           {status}
         </span>
       );

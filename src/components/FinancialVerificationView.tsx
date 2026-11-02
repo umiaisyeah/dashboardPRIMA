@@ -90,8 +90,21 @@ export const FinancialVerificationView: React.FC<FinancialVerificationViewProps>
     }
   };
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const filteredItems = items.filter((item) => {
     const hasDelta = item.is_changed !== undefined ? item.is_changed : (Math.abs(item.delta_value) > 0 || Math.abs(item.delta_qty) > 0 || Math.abs(item.delta_unit_price) > 0);
+    
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const match =
+        item.item.toLowerCase().includes(q) ||
+        item.change_id.toLowerCase().includes(q) ||
+        (item.justification && item.justification.toLowerCase().includes(q)) ||
+        (item.unit && item.unit.toLowerCase().includes(q));
+      if (!match) return false;
+    }
+
     if (filterMode === 'all') return true;
     if (filterMode === 'changed') return hasDelta;
     if (filterMode === 'increase') return item.delta_value > 0;
@@ -142,26 +155,26 @@ Manfaat (Benefit): ${tech.benefit}`
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-emerald-600" />
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                <Calculator className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Verifikasi Finansial (Khusus Approval JusFin)
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                Pilar Approval JusFin (Angka & Plafon 10%)
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Pilar Approval JusFin (Angka &amp; Plafon 10%)
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Fokus eksklusif untuk <strong className="text-emerald-700">Approval Justifikasi Finansial (JusFin)</strong>: Mengaudit perhitungan matematis RAB Awal vs Revisi, delta biaya (Rp), kewajaran harga satuan, dan batas toleransi amandemen 10%. Terpisah dari aspek teknis fisik.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Fokus eksklusif untuk <strong className="text-emerald-700 dark:text-emerald-400">Approval Justifikasi Finansial (JusFin)</strong>: Mengaudit perhitungan matematis RAB Awal vs Revisi, delta biaya (Rp), kewajaran harga satuan, dan batas toleransi amandemen 10%. Terpisah dari aspek teknis fisik.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               Deterministic Math Engine
             </span>
           </div>
@@ -170,10 +183,10 @@ Manfaat (Benefit): ${tech.benefit}`
 
       {/* Critical Comparison: JusFin Stated vs Calculated */}
       <div
-        className={`rounded-2xl border-2 p-6 shadow-xs ${
+        className={`rounded-2xl border-2 p-6 shadow-xs transition-colors ${
           totalRab.delta_match
-            ? 'bg-emerald-50/50 border-emerald-300'
-            : 'bg-rose-50/70 border-rose-300'
+            ? 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800/80'
+            : 'bg-rose-50/70 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800'
         }`}
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -188,30 +201,30 @@ Manfaat (Benefit): ${tech.benefit}`
               >
                 {totalRab.status}
               </span>
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">
                 Audit Rekapitulasi JusFin vs Kalkulasi Sistem
               </h3>
             </div>
-            <p className="text-xs text-slate-700 leading-relaxed max-w-3xl">
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed max-w-3xl">
               {totalRab.explanation}
             </p>
           </div>
 
           <div className="flex items-center gap-4 text-xs font-mono shrink-0">
-            <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-slate-400 block text-[10px] font-sans font-medium">
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <span className="text-slate-400 dark:text-slate-400 block text-[10px] font-sans font-medium">
                 Tertulis pada JusFin
               </span>
-              <span className="text-sm font-bold text-rose-700">
+              <span className="text-sm font-bold text-rose-700 dark:text-rose-400">
                 {formatRupiah(totalRab.stated_jusfin_delta)}
               </span>
             </div>
 
-            <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-slate-400 block text-[10px] font-sans font-medium">
+            <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xs">
+              <span className="text-slate-400 dark:text-slate-400 block text-[10px] font-sans font-medium">
                 Hasil Hitung Sistem (Revisi - Awal)
               </span>
-              <span className="text-sm font-bold text-emerald-700">
+              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
                 {formatRupiah(totalRab.system_calculated_delta)}
               </span>
             </div>
@@ -423,16 +436,16 @@ Manfaat (Benefit): ${tech.benefit}`
       )}
 
       {/* Financial Items Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setFilterMode('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 filterMode === 'all'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                  ? 'bg-slate-900 dark:bg-slate-700 text-white'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               Semua Item ({items.length})
@@ -440,10 +453,10 @@ Manfaat (Benefit): ${tech.benefit}`
             <button
               type="button"
               onClick={() => setFilterMode('changed')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 filterMode === 'changed'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-50'
+                  : 'bg-white dark:bg-slate-800 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-slate-700'
               }`}
             >
               Item Berubah ({countChanged})
@@ -451,10 +464,10 @@ Manfaat (Benefit): ${tech.benefit}`
             <button
               type="button"
               onClick={() => setFilterMode('increase')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 filterMode === 'increase'
                   ? 'bg-rose-600 text-white'
-                  : 'bg-white text-rose-700 border border-rose-200 hover:bg-rose-50'
+                  : 'bg-white dark:bg-slate-800 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-slate-700'
               }`}
             >
               Pekerjaan Tambah (+{countIncrease})
@@ -462,10 +475,10 @@ Manfaat (Benefit): ${tech.benefit}`
             <button
               type="button"
               onClick={() => setFilterMode('decrease')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 filterMode === 'decrease'
                   ? 'bg-emerald-600 text-white'
-                  : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
+                  : 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-slate-700'
               }`}
             >
               Ditiadakan / Efisiensi (-{countDecrease})
@@ -473,10 +486,10 @@ Manfaat (Benefit): ${tech.benefit}`
             <button
               type="button"
               onClick={() => setFilterMode('unchanged')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 filterMode === 'unchanged'
-                  ? 'bg-slate-600 text-white'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                  ? 'bg-slate-600 dark:bg-slate-600 text-white'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               Tetap ({countUnchanged})
@@ -485,10 +498,10 @@ Manfaat (Benefit): ${tech.benefit}`
               <button
                 type="button"
                 onClick={() => setFilterMode('anomaly')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer ${
                   filterMode === 'anomaly'
                     ? 'bg-rose-600 text-white'
-                    : 'bg-rose-50 text-rose-700 border border-rose-300 hover:bg-rose-100'
+                    : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900/60'
                 }`}
               >
                 <AlertTriangle className="w-3 h-3" />
@@ -499,25 +512,46 @@ Manfaat (Benefit): ${tech.benefit}`
               <button
                 type="button"
                 onClick={() => setFilterMode('unreferenced')}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   filterMode === 'unreferenced'
                     ? 'bg-amber-600 text-white'
-                    : 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100'
+                    : 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/60'
                 }`}
               >
                 Tanpa Ref BA ({countUnreferenced})
               </button>
             )}
           </div>
-          <span className="text-xs text-slate-500 font-mono font-medium">
-            Menampilkan {filteredItems.length} dari {items.length} item
-          </span>
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full sm:w-auto">
+            <div className="relative w-full sm:w-60">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari item / ID finansial..."
+                className="w-full pl-8 pr-7 py-1 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-medium text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00aded]"
+              />
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono font-medium whitespace-nowrap">
+              {filteredItems.length} dari {items.length} item
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+              <tr className="bg-slate-50/80 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider text-[10px]">
                 <th className="py-3 px-3 w-10 text-center"></th>
                 <th className="py-3 px-3 w-20">ID</th>
                 <th className="py-3 px-4 min-w-56">Item Pekerjaan</th>
@@ -535,7 +569,7 @@ Manfaat (Benefit): ${tech.benefit}`
                 <th className="py-3 px-3 w-20 text-center">Detail</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {filteredItems.map((f, idx) => {
                 const linkedTech = getLinkedTechChange(f.change_id, f.item);
                 const isExpanded = expandedRowId === f.change_id;
@@ -544,10 +578,10 @@ Manfaat (Benefit): ${tech.benefit}`
                   <React.Fragment key={`${f.change_id}_${idx}`}>
                     <tr
                       onClick={() => setSelectedItem(f)}
-                      className="hover:bg-blue-50/40 transition-colors cursor-pointer group"
+                      className="hover:bg-blue-50/40 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
                     >
                       <td
-                        className="py-3 px-2 text-center text-slate-400"
+                        className="py-3 px-2 text-center text-slate-400 dark:text-slate-500"
                         onClick={(e) => {
                           e.stopPropagation();
                           setExpandedRowId(isExpanded ? null : f.change_id);
@@ -555,7 +589,7 @@ Manfaat (Benefit): ${tech.benefit}`
                       >
                         <button
                           type="button"
-                          className="p-1 rounded hover:bg-slate-200 text-slate-500 transition-colors"
+                          className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors cursor-pointer"
                           title="Buka / tutup rincian inline"
                         >
                           {isExpanded ? (
@@ -565,18 +599,18 @@ Manfaat (Benefit): ${tech.benefit}`
                           )}
                         </button>
                       </td>
-                      <td className="py-3.5 px-3 font-mono font-bold text-slate-900">
+                      <td className="py-3.5 px-3 font-mono font-bold text-slate-900 dark:text-white">
                         {f.change_id}
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                          <span className="font-semibold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
                             {f.item}
                           </span>
                           {/* Traceability ID Badge */}
                           {f.traceability_ref_id && f.has_valid_ba_ref && (
                             <span
-                              className="px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold bg-blue-50 text-blue-800 border border-blue-200"
+                              className="px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-800 dark:text-cyan-300 border border-blue-200 dark:border-blue-800"
                               title={`Traceability Reference ID: ${f.traceability_ref_id}`}
                             >
                               REF: {f.traceability_ref_id}
@@ -608,17 +642,17 @@ Manfaat (Benefit): ${tech.benefit}`
                             </span>
                           )}
                           {(f.evidence_type === 'EXPLICIT' || linkedTech?.evidence_type === 'EXPLICIT') && (
-                            <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-300">
+                            <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                               BUKTI EKSPLISIT
                             </span>
                           )}
                           {(f.evidence_type === 'IMPLICIT' || linkedTech?.evidence_type === 'IMPLICIT') && (
-                            <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                            <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                               BUKTI IMPLISIT
                             </span>
                           )}
                           {((f.evidence_found === false || f.evidence_type === 'NONE') && (!linkedTech || linkedTech.evidence_type === 'NONE')) && (
-                            <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+                            <span className="px-1.5 py-0.5 rounded text-[8.5px] font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
                               TIDAK ADA BUKTI
                             </span>
                           )}
@@ -630,7 +664,7 @@ Manfaat (Benefit): ${tech.benefit}`
                             {(f.sub_specs_differences || linkedTech?.sub_specs_differences || []).map((diff, sIdx) => (
                               <span
                                 key={sIdx}
-                                className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200"
+                                className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
                                 title="Perubahan sub-spesifikasi teknis tertulis di bawah item"
                               >
                                 {diff}
@@ -638,22 +672,22 @@ Manfaat (Benefit): ${tech.benefit}`
                             ))}
                           </div>
                         )}
-                        <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5" title={f.justification}>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5" title={f.justification}>
                           {f.justification}
                         </p>
                       </td>
-                      <td className="py-3.5 px-2 text-center text-slate-500">{f.unit}</td>
-                      <td className="py-3.5 px-3 text-right font-mono">{formatQuantity(f.qty_initial)}</td>
-                      <td className="py-3.5 px-3 text-right font-mono font-semibold text-slate-800">
+                      <td className="py-3.5 px-2 text-center text-slate-500 dark:text-slate-400">{f.unit}</td>
+                      <td className="py-3.5 px-3 text-right font-mono text-slate-700 dark:text-slate-300">{formatQuantity(f.qty_initial)}</td>
+                      <td className="py-3.5 px-3 text-right font-mono font-semibold text-slate-800 dark:text-slate-100">
                         {formatQuantity(f.qty_revised)}
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono">
                         <span
                           className={`font-semibold ${
                             f.delta_qty < 0
-                              ? 'text-emerald-700'
+                              ? 'text-emerald-700 dark:text-emerald-400'
                               : f.delta_qty > 0
-                              ? 'text-rose-700'
+                              ? 'text-rose-700 dark:text-rose-400'
                               : 'text-slate-400'
                           }`}
                         >
@@ -662,41 +696,41 @@ Manfaat (Benefit): ${tech.benefit}`
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono">
-                        <span className="font-semibold text-slate-900 block">{formatRupiah(f.unit_price_revised)}</span>
+                        <span className="font-semibold text-slate-900 dark:text-white block">{formatRupiah(f.unit_price_revised)}</span>
                         {f.delta_unit_price !== 0 && (
-                          <span className="text-[10px] text-slate-400 block font-sans">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block font-sans">
                             Awal: {formatRupiah(f.unit_price_initial)}
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono text-slate-600">
+                      <td className="py-3.5 px-3 text-right font-mono text-slate-600 dark:text-slate-400">
                         {formatRupiah(f.calculated_initial)}
                       </td>
-                      <td className="py-3.5 px-3 text-right font-mono font-bold text-slate-900 bg-slate-50/50">
+                      <td className="py-3.5 px-3 text-right font-mono font-bold text-slate-900 dark:text-white bg-slate-50/50 dark:bg-slate-800/40">
                         {formatRupiah(f.calculated_revised)}
                       </td>
                       <td className="py-3.5 px-3 text-right font-mono font-bold">
                         <span
                           className={
                             f.delta_value < 0
-                              ? 'text-emerald-700'
+                              ? 'text-emerald-700 dark:text-emerald-400'
                               : f.delta_value > 0
-                              ? 'text-rose-700'
+                              ? 'text-rose-700 dark:text-rose-400'
                               : 'text-slate-400'
                           }
                         >
                           {formatRupiah(f.delta_value)}
                         </span>
                       </td>
-                      <td className="py-3.5 px-2 text-center font-mono text-[11px]">
+                      <td className="py-3.5 px-2 text-center font-mono text-[11px] text-slate-700 dark:text-slate-300">
                         {formatPercentage(f.delta_percentage, 2)}
                       </td>
                       <td className="py-3.5 px-3 text-center">
                         <span
                           className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                             f.calculation_status === 'VERIFIED'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-rose-100 text-rose-800'
+                              ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300'
+                              : 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300'
                           }`}
                         >
                           {f.calculation_status}
@@ -712,7 +746,7 @@ Manfaat (Benefit): ${tech.benefit}`
                             e.stopPropagation();
                             setSelectedItem(f);
                           }}
-                          className="p-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors inline-flex items-center gap-1 text-[10px] font-semibold"
+                          className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-cyan-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors inline-flex items-center gap-1 text-[10px] font-semibold cursor-pointer"
                           title="Klik untuk melihat teks dan kalkulasi lengkap"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -723,23 +757,23 @@ Manfaat (Benefit): ${tech.benefit}`
 
                     {/* Inline Expander Row: Kajian 3 Pilar Perubahan */}
                     {isExpanded && (
-                      <tr className="bg-slate-50/90 border-b border-slate-200">
+                      <tr className="bg-slate-50/90 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800">
                         <td colSpan={15} className="p-4">
-                          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-4 shadow-2xs">
-                            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-4 shadow-2xs">
+                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                               <div className="flex items-center gap-2">
-                                <span className="font-mono font-bold text-xs bg-slate-900 text-white px-2 py-0.5 rounded">
+                                <span className="font-mono font-bold text-xs bg-slate-900 dark:bg-slate-800 text-white px-2 py-0.5 rounded border border-slate-700">
                                   {f.change_id}
                                 </span>
-                                <span className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                                  <Scale className="w-4 h-4 text-indigo-600" />
+                                <span className="font-bold text-slate-800 dark:text-slate-200 text-xs flex items-center gap-1.5">
+                                  <Scale className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                                   Kajian Komprehensif Perubahan: Deskripsi Pekerjaan, Kuantitas &amp; Harga
                                 </span>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => setSelectedItem(f)}
-                                className="text-xs text-blue-600 hover:underline font-semibold"
+                                className="text-xs text-blue-600 dark:text-cyan-400 hover:underline font-semibold cursor-pointer"
                               >
                                 Buka Modal Dialog Penuh &rarr;
                               </button>
@@ -748,29 +782,29 @@ Manfaat (Benefit): ${tech.benefit}`
                             {/* 3-Pillar Kajian Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                               {/* Pilar 1: Deskripsi & Sub-Spesifikasi di Bawahnya */}
-                              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 flex flex-col justify-between">
+                              <div className="bg-slate-50 dark:bg-slate-800/70 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 flex flex-col justify-between">
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1 mb-1">
-                                    <FileCheck className="w-3.5 h-3.5 text-blue-600" />
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-1">
+                                    <FileCheck className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                                     1. Kajian Deskripsi &amp; Sub-Spesifikasi Bawah
                                   </span>
-                                  <span className="font-bold text-slate-900 block text-xs">
+                                  <span className="font-bold text-slate-900 dark:text-white block text-xs">
                                     {f.item}
                                   </span>
-                                  <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                                     {f.justification}
                                   </p>
 
                                   {/* Sub-spesifikasi differences */}
                                   {((f.sub_specs_differences && f.sub_specs_differences.length > 0) ||
                                     (linkedTech?.sub_specs_differences && linkedTech.sub_specs_differences.length > 0)) && (
-                                    <div className="mt-2 pt-2 border-t border-slate-200/80 space-y-1">
-                                      <span className="text-[9.5px] font-bold text-indigo-800 uppercase tracking-wider block">
+                                    <div className="mt-2 pt-2 border-t border-slate-200/80 dark:border-slate-700 space-y-1">
+                                      <span className="text-[9.5px] font-bold text-indigo-800 dark:text-indigo-300 uppercase tracking-wider block">
                                         Perubahan Spesifikasi Tertulis di Bawahnya:
                                       </span>
                                       <div className="space-y-0.5 font-mono text-[10px]">
                                         {(f.sub_specs_differences || linkedTech?.sub_specs_differences || []).map((diff, sIdx) => (
-                                          <div key={sIdx} className="bg-indigo-50/80 px-2 py-0.5 rounded text-indigo-950 border border-indigo-200">
+                                          <div key={sIdx} className="bg-indigo-50/80 dark:bg-indigo-950/60 px-2 py-0.5 rounded text-indigo-950 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800">
                                             {diff}
                                           </div>
                                         ))}
@@ -779,43 +813,43 @@ Manfaat (Benefit): ${tech.benefit}`
                                   )}
                                 </div>
                                 {linkedTech && (
-                                  <div className="pt-2 text-[10px] text-slate-500 border-t border-slate-200/60">
-                                    Kategori: <strong className="text-slate-800 font-semibold">{linkedTech.category}</strong>
+                                  <div className="pt-2 text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-700">
+                                    Kategori: <strong className="text-slate-800 dark:text-slate-200 font-semibold">{linkedTech.category}</strong>
                                   </div>
                                 )}
                               </div>
 
                               {/* Pilar 2: Quantity (Kuantitas / Volume) */}
-                              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 flex flex-col justify-between">
+                              <div className="bg-slate-50 dark:bg-slate-800/70 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 flex flex-col justify-between">
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1 mb-1">
-                                    <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-1">
+                                    <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                                     2. Kajian Kuantitas (Volume &amp; Satuan)
                                   </span>
                                   <div className="grid grid-cols-2 gap-2 pt-1 font-mono">
-                                    <div className="bg-white p-2 rounded-lg border border-slate-200">
-                                      <span className="text-[9px] text-slate-400 block font-sans">Volume Semula:</span>
-                                      <span className="font-bold text-slate-800 text-xs">
+                                    <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                                      <span className="text-[9px] text-slate-400 dark:text-slate-500 block font-sans">Volume Semula:</span>
+                                      <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">
                                         {formatQuantity(f.qty_initial)} {f.unit}
                                       </span>
                                     </div>
-                                    <div className="bg-white p-2 rounded-lg border border-slate-200">
-                                      <span className="text-[9px] text-slate-400 block font-sans">Volume Menjadi:</span>
-                                      <span className="font-bold text-slate-900 text-xs">
+                                    <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                                      <span className="text-[9px] text-slate-400 dark:text-slate-500 block font-sans">Volume Menjadi:</span>
+                                      <span className="font-bold text-slate-900 dark:text-white text-xs">
                                         {formatQuantity(f.qty_revised)} {f.unit}
                                       </span>
                                     </div>
                                   </div>
-                                  <div className="mt-2 p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-[11px]">
-                                    <span className="text-slate-500 font-medium">Delta Volume:</span>
+                                  <div className="mt-2 p-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-[11px]">
+                                    <span className="text-slate-500 dark:text-slate-400 font-medium">Delta Volume:</span>
                                     <span className={`font-mono font-bold ${
-                                      f.delta_qty > 0 ? 'text-rose-700' : f.delta_qty < 0 ? 'text-emerald-700' : 'text-slate-600'
+                                      f.delta_qty > 0 ? 'text-rose-700 dark:text-rose-400' : f.delta_qty < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'
                                     }`}>
                                       {f.delta_qty > 0 ? '+' : ''}{formatQuantity(f.delta_qty)} {f.unit}
                                     </span>
                                   </div>
                                 </div>
-                                <p className="text-[10px] text-slate-500 leading-relaxed italic border-t border-slate-200/60 pt-2">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed italic border-t border-slate-200/60 dark:border-slate-700 pt-2">
                                   {f.delta_qty === 0
                                     ? 'Volume fisik konstan sesuai kontrak awal.'
                                     : f.qty_initial === 0
@@ -827,46 +861,46 @@ Manfaat (Benefit): ${tech.benefit}`
                               </div>
 
                               {/* Pilar 3: Harga (Harga Satuan & Total Anggaran) */}
-                              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 flex flex-col justify-between">
+                              <div className="bg-slate-50 dark:bg-slate-800/70 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 flex flex-col justify-between">
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1 mb-1">
-                                    <Calculator className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1 mb-1">
+                                    <Calculator className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                     3. Kajian Harga (Satuan &amp; Total Biaya)
                                   </span>
                                   <div className="space-y-1.5 pt-1 font-mono text-[11px]">
-                                    <div className="flex justify-between bg-white p-2 rounded-lg border border-slate-200">
-                                      <span className="text-slate-500 font-sans text-[10px]">Harga Satuan:</span>
+                                    <div className="flex justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                                      <span className="text-slate-500 dark:text-slate-400 font-sans text-[10px]">Harga Satuan:</span>
                                       <div className="text-right">
-                                        <span className="font-bold text-slate-900">{formatRupiah(f.unit_price_revised)}</span>
+                                        <span className="font-bold text-slate-900 dark:text-white">{formatRupiah(f.unit_price_revised)}</span>
                                         {f.delta_unit_price !== 0 && (
-                                          <span className="block text-[9.5px] text-slate-400 font-sans">
+                                          <span className="block text-[9.5px] text-slate-400 dark:text-slate-500 font-sans">
                                             Awal: {formatRupiah(f.unit_price_initial)} (Delta: {f.delta_unit_price > 0 ? '+' : ''}{formatRupiah(f.delta_unit_price)})
                                           </span>
                                         )}
                                       </div>
                                     </div>
-                                    <div className="flex justify-between bg-white p-2 rounded-lg border border-slate-200">
-                                      <span className="text-slate-500 font-sans text-[10px]">Total Anggaran:</span>
+                                    <div className="flex justify-between bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                                      <span className="text-slate-500 dark:text-slate-400 font-sans text-[10px]">Total Anggaran:</span>
                                       <div className="text-right">
-                                        <span className="text-[9.5px] text-slate-400 block font-sans">
+                                        <span className="text-[9.5px] text-slate-400 dark:text-slate-500 block font-sans">
                                           Semula: {formatRupiah(f.calculated_initial)}
                                         </span>
-                                        <span className="font-bold text-slate-900 block">
+                                        <span className="font-bold text-slate-900 dark:text-white block">
                                           Menjadi: {formatRupiah(f.calculated_revised)}
                                         </span>
                                       </div>
                                     </div>
-                                    <div className="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 font-bold">
-                                      <span className="text-slate-700 font-sans text-[10px]">Delta Total:</span>
-                                      <span className={f.delta_value > 0 ? 'text-rose-700' : f.delta_value < 0 ? 'text-emerald-700' : 'text-slate-600'}>
+                                    <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 font-bold">
+                                      <span className="text-slate-700 dark:text-slate-300 font-sans text-[10px]">Delta Total:</span>
+                                      <span className={f.delta_value > 0 ? 'text-rose-700 dark:text-rose-400' : f.delta_value < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-400'}>
                                         {f.delta_value > 0 ? '+' : ''}{formatRupiah(f.delta_value)} ({formatPercentage(f.delta_percentage)})
                                       </span>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-slate-200/60 pt-2 font-sans">
-                                  <span>Status Aritmatika: <strong className="text-emerald-700">{f.calculation_status}</strong></span>
-                                  <span>Status: <strong className="text-slate-800">{f.financial_status}</strong></span>
+                                <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-700 pt-2 font-sans">
+                                  <span>Status Aritmatika: <strong className="text-emerald-700 dark:text-emerald-400">{f.calculation_status}</strong></span>
+                                  <span>Status: <strong className="text-slate-800 dark:text-slate-200">{f.financial_status}</strong></span>
                                 </div>
                               </div>
                             </div>
@@ -879,31 +913,31 @@ Manfaat (Benefit): ${tech.benefit}`
                               const effRationale = f.implicit_rationale || linkedTech?.implicit_rationale;
 
                               return (
-                                <div className="mt-3 pt-3 border-t border-slate-200">
+                                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                                   <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                                      <FileSearch className="w-3.5 h-3.5 text-purple-600" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                      <FileSearch className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                                       Pemeriksaan Bukti Multi-Dokumen (FAT, BA MC-0/100, Back Up Volume, BAPL)
                                     </span>
                                     {effEvType === 'EXPLICIT' && (
-                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                                         BUKTI EKSPLISIT (Tertulis Langsung)
                                       </span>
                                     )}
                                     {effEvType === 'IMPLICIT' && (
-                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                                         BUKTI IMPLISIT (Deduksi Rekayasa)
                                       </span>
                                     )}
                                     {effEvType === 'NONE' && (
-                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
                                         TIDAK ADA BUKTI (Di Seluruh Dokumen yang Diunggah)
                                       </span>
                                     )}
                                   </div>
 
                                   {effSnippet && (
-                                    <div className="bg-slate-900 text-slate-100 p-2.5 rounded-lg text-[11px] font-mono mb-2">
+                                    <div className="bg-slate-900 text-slate-100 p-2.5 rounded-lg text-[11px] font-mono mb-2 border border-slate-800">
                                       <span className="text-purple-400 font-sans text-[10px] block font-bold mb-0.5">
                                         Kutipan Temuan Dokumen Resmi:
                                       </span>
@@ -918,8 +952,8 @@ Manfaat (Benefit): ${tech.benefit}`
                                   )}
 
                                   {effRationale && (
-                                    <div className="bg-purple-50 p-2.5 rounded-lg border border-purple-200 text-[11px] text-purple-950 mb-2">
-                                      <strong className="text-purple-900 font-bold block mb-0.5">Penjelasan Deduksi Teknis:</strong>
+                                    <div className="bg-purple-50 dark:bg-purple-950/40 p-2.5 rounded-lg border border-purple-200 dark:border-purple-800 text-[11px] text-purple-950 dark:text-purple-200 mb-2">
+                                      <strong className="text-purple-900 dark:text-purple-300 font-bold block mb-0.5">Penjelasan Deduksi Teknis:</strong>
                                       <HighlightedText
                                         text={effRationale}
                                         matchTarget={[f.item, f.justification || '', f.explanation || '']}
@@ -929,17 +963,17 @@ Manfaat (Benefit): ${tech.benefit}`
 
                                   {effDocs.length > 0 && (
                                     <div className="space-y-1 mt-2">
-                                      <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">
+                                      <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">
                                         {effDocs.length} Berkas Bukti Terverifikasi Saling Mengonfirmasi (Corroborating Evidence):
                                       </span>
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         {effDocs.map((doc, dIdx) => (
-                                          <div key={dIdx} className="bg-slate-50 p-2 rounded-lg border border-slate-200 text-[10px] space-y-0.5">
-                                            <div className="flex items-center justify-between font-bold text-slate-800">
+                                          <div key={dIdx} className="bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-[10px] space-y-0.5">
+                                            <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
                                               <span>{doc.doc_type} (Hal {doc.page})</span>
-                                              <span className="text-slate-500 font-normal truncate max-w-[150px]">{doc.doc_name}</span>
+                                              <span className="text-slate-500 dark:text-slate-400 font-normal truncate max-w-[150px]">{doc.doc_name}</span>
                                             </div>
-                                            <p className="text-slate-600 line-clamp-2 italic font-mono">
+                                            <p className="text-slate-600 dark:text-slate-300 line-clamp-2 italic font-mono">
                                               &ldquo;
                                               <HighlightedText
                                                 text={doc.snippet}
@@ -963,10 +997,10 @@ Manfaat (Benefit): ${tech.benefit}`
                 );
               })}
             </tbody>
-            <tfoot className="bg-slate-100/90 border-t-2 border-slate-300 font-semibold text-slate-900">
+            <tfoot className="bg-slate-100/90 dark:bg-slate-800/90 border-t-2 border-slate-300 dark:border-slate-700 font-semibold text-slate-900 dark:text-white">
               {/* Subtotal of currently filtered items if filter is active */}
               {filteredItems.length !== items.length && (
-                <tr className="border-b border-slate-200 text-slate-700 bg-slate-50 text-[11px]">
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-850 text-[11px]">
                   <td colSpan={8} className="py-2.5 px-4 text-right font-medium">
                     Subtotal Baris Tampil ({filteredItems.length} dari {items.length} item):
                   </td>
@@ -983,14 +1017,14 @@ Manfaat (Benefit): ${tech.benefit}`
                 </tr>
               )}
               {/* Authoritative Total Project RAB Row */}
-              <tr className="bg-slate-900 text-white font-bold text-xs">
+              <tr className="bg-slate-900 dark:bg-slate-950 text-white font-bold text-xs">
                 <td colSpan={8} className="py-3.5 px-4 text-right uppercase tracking-wider font-mono text-[11px]">
                   TOTAL REKAPITULASI RAB KONTRAK (OTORITAS RESMI):
                 </td>
                 <td className="py-3.5 px-3 text-right font-mono text-slate-200">
                   {formatRupiah(totalRab.rab_initial)}
                 </td>
-                <td className="py-3.5 px-3 text-right font-mono text-emerald-300 bg-slate-800">
+                <td className="py-3.5 px-3 text-right font-mono text-emerald-300 bg-slate-800 dark:bg-slate-900">
                   {formatRupiah(totalRab.rab_revised)}
                 </td>
                 <td className="py-3.5 px-3 text-right font-mono">
@@ -1018,31 +1052,31 @@ Manfaat (Benefit): ${tech.benefit}`
       {/* Comprehensive Modal: Full Untruncated Text & Baseline-to-BAPL Correlation */}
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden transition-colors">
             {/* Modal Header */}
-            <div className="p-5 border-b border-slate-200 bg-slate-50/80 flex items-start justify-between gap-4">
+            <div className="p-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900 flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-900 text-white">
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-900 dark:bg-slate-800 text-white border border-slate-700">
                     {selectedItem.change_id}
                   </span>
                   <span
                     className={`px-2 py-0.5 rounded text-xs font-bold ${
                       selectedItem.calculation_status === 'VERIFIED'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-rose-100 text-rose-800'
+                        ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300'
+                        : 'bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300'
                     }`}
                   >
                     ARITMATIKA: {selectedItem.calculation_status}
                   </span>
                   <StatusBadge status={selectedItem.financial_status} />
                   {selectedTech && (
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-cyan-300 border border-blue-200 dark:border-blue-800">
                       {selectedTech.category}
                     </span>
                   )}
                 </div>
-                <h3 className="text-base font-bold text-slate-900 pt-1 leading-snug">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white pt-1 leading-snug">
                   {selectedItem.item}
                 </h3>
               </div>
@@ -1051,17 +1085,17 @@ Manfaat (Benefit): ${tech.benefit}`
                 <button
                   type="button"
                   onClick={() => handleCopyDetails(selectedItem, selectedTech)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer"
                   title="Salin rincian lengkap ke clipboard"
                 >
                   {copied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-600">Tersalin!</span>
+                      <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="text-emerald-600 dark:text-emerald-400">Tersalin!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 text-slate-500" />
+                      <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                       <span>Salin Rincian</span>
                     </>
                   )}
@@ -1070,7 +1104,7 @@ Manfaat (Benefit): ${tech.benefit}`
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1078,32 +1112,32 @@ Manfaat (Benefit): ${tech.benefit}`
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-700">
+            <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-700 dark:text-slate-300">
               {/* Traceability ID & Berita Acara Reference Verification Card */}
               <div
                 className={`p-4 rounded-xl border ${
                   selectedItem.ba_anomaly_type && selectedItem.ba_anomaly_type !== 'NONE'
-                    ? 'bg-rose-50 border-rose-300'
+                    ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800'
                     : selectedItem.has_valid_ba_ref
-                    ? 'bg-blue-50/70 border-blue-200'
-                    : 'bg-slate-50 border-slate-200'
+                    ? 'bg-blue-50/70 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
                 } space-y-2.5`}
               >
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
-                    <FileCheck className={`w-4 h-4 ${selectedItem.ba_anomaly_type && selectedItem.ba_anomaly_type !== 'NONE' ? 'text-rose-600' : 'text-blue-600'}`} />
-                    <span className="font-bold uppercase tracking-wider text-[11px] text-slate-900">
+                    <FileCheck className={`w-4 h-4 ${selectedItem.ba_anomaly_type && selectedItem.ba_anomaly_type !== 'NONE' ? 'text-rose-600 dark:text-rose-400' : 'text-blue-600 dark:text-cyan-400'}`} />
+                    <span className="font-bold uppercase tracking-wider text-[11px] text-slate-900 dark:text-white">
                       Rujukan Dokumen Berita Acara &amp; Traceability ID
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     {selectedItem.traceability_ref_id && (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white text-slate-800 border border-slate-300 shadow-2xs">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 shadow-2xs">
                         ID: {selectedItem.traceability_ref_id}
                       </span>
                     )}
                     {selectedItem.has_valid_ba_ref ? (
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                         ✓ Rujukan BA Terverifikasi
                       </span>
                     ) : (
@@ -1116,23 +1150,23 @@ Manfaat (Benefit): ${tech.benefit}`
 
                 {/* Reference Details or Anomaly Details */}
                 {selectedItem.ba_anomaly_description && (
-                  <div className="p-2.5 rounded-lg bg-white border border-rose-200 text-rose-900 font-medium text-[11px] leading-relaxed">
-                    <span className="font-bold block text-rose-700 mb-0.5">⚠️ Temuan Anomali Pipeline:</span>
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-800 text-rose-900 dark:text-rose-300 font-medium text-[11px] leading-relaxed">
+                    <span className="font-bold block text-rose-700 dark:text-rose-400 mb-0.5">⚠️ Temuan Anomali Pipeline:</span>
                     {selectedItem.ba_anomaly_description}
                   </div>
                 )}
 
                 {selectedItem.ba_reference_clause && (
-                  <div className="bg-white/80 p-2.5 rounded-lg border border-blue-100 text-[11px] text-slate-700 space-y-1">
-                    <div className="flex items-center justify-between text-slate-500 text-[10px]">
-                      <span>Dokumen: <strong>{selectedItem.ba_reference_clause.doc_name}</strong> ({selectedItem.ba_reference_clause.doc_type})</span>
+                  <div className="bg-white/80 dark:bg-slate-800/90 p-2.5 rounded-lg border border-blue-100 dark:border-blue-900 text-[11px] text-slate-700 dark:text-slate-300 space-y-1">
+                    <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px]">
+                      <span>Dokumen: <strong className="text-slate-700 dark:text-slate-200">{selectedItem.ba_reference_clause.doc_name}</strong> ({selectedItem.ba_reference_clause.doc_type})</span>
                       <span>Halaman/Sheet: {selectedItem.ba_reference_clause.page}</span>
                     </div>
-                    <p className="font-mono text-slate-900 italic">
+                    <p className="font-mono text-slate-900 dark:text-white italic">
                       "{selectedItem.ba_reference_clause.clause}"
                     </p>
                     {selectedItem.ba_reference_clause.matched_qty !== undefined && (
-                      <div className="text-[10px] text-emerald-700 font-bold">
+                      <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold">
                         Kuantitas Terekam di BA: {selectedItem.ba_reference_clause.matched_qty} {selectedItem.ba_reference_clause.matched_unit || selectedItem.unit}
                       </div>
                     )}
@@ -1142,34 +1176,34 @@ Manfaat (Benefit): ${tech.benefit}`
 
               {/* Comprehensive 3-Pillar Kajian (Deskripsi Pekerjaan & Sub-Spesifikasi Bawah, Quantity, Harga) */}
               <div className="space-y-3">
-                <div className="flex items-center gap-2 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
-                  <Scale className="w-4 h-4 text-blue-600" />
+                <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold uppercase tracking-wider text-[11px]">
+                  <Scale className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                   <span>Kajian Komprehensif 3 Pilar Perubahan Kontrak</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {/* Pillar 1 */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                    <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <FileCheck className="w-3.5 h-3.5 text-blue-600" />
+                  <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileCheck className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
                       1. Deskripsi &amp; Sub-Spesifikasi Bawah
                     </span>
-                    <span className="font-semibold text-slate-900 block text-xs">
+                    <span className="font-semibold text-slate-900 dark:text-white block text-xs">
                       {selectedItem.item}
                     </span>
-                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
                       {selectedItem.justification}
                     </p>
                     {/* Sub-specs if available */}
                     {((selectedItem.sub_specs_differences && selectedItem.sub_specs_differences.length > 0) ||
                       (selectedTech?.sub_specs_differences && selectedTech.sub_specs_differences.length > 0)) && (
-                      <div className="pt-2 border-t border-slate-200 space-y-1">
-                        <span className="text-[9.5px] font-bold text-indigo-700 uppercase tracking-wider block">
+                      <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
+                        <span className="text-[9.5px] font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider block">
                           Perubahan Baris Sub-Spesifikasi:
                         </span>
                         <div className="space-y-1 font-mono text-[10px]">
                           {(selectedItem.sub_specs_differences || selectedTech?.sub_specs_differences || []).map((diff, idx) => (
-                            <div key={idx} className="bg-white p-1.5 rounded border border-indigo-100 text-indigo-950 font-medium">
+                            <div key={idx} className="bg-white dark:bg-slate-800 p-1.5 rounded border border-indigo-100 dark:border-indigo-900 text-indigo-950 dark:text-indigo-200 font-medium">
                               {diff}
                             </div>
                           ))}
@@ -1179,23 +1213,23 @@ Manfaat (Benefit): ${tech.benefit}`
                   </div>
 
                   {/* Pillar 2 */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                    <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-indigo-600" />
+                  <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                       2. Kajian Quantity (Volume)
                     </span>
                     <div className="space-y-1.5 font-mono text-[11px]">
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-[9.5px] text-slate-500 font-sans block">Volume Semula:</span>
-                        <span className="font-bold text-slate-800">{formatQuantity(selectedItem.qty_initial)} {selectedItem.unit}</span>
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-sans block">Volume Semula:</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200">{formatQuantity(selectedItem.qty_initial)} {selectedItem.unit}</span>
                       </div>
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-[9.5px] text-slate-500 font-sans block">Volume Menjadi:</span>
-                        <span className="font-bold text-slate-900">{formatQuantity(selectedItem.qty_revised)} {selectedItem.unit}</span>
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-sans block">Volume Menjadi:</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{formatQuantity(selectedItem.qty_revised)} {selectedItem.unit}</span>
                       </div>
-                      <div className="bg-white p-2 rounded-lg border border-slate-200 font-bold flex justify-between">
-                        <span className="text-slate-600 font-sans text-[10px]">Selisih Volume:</span>
-                        <span className={selectedItem.delta_qty > 0 ? 'text-rose-700' : selectedItem.delta_qty < 0 ? 'text-emerald-700' : 'text-slate-500'}>
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 font-bold flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-300 font-sans text-[10px]">Selisih Volume:</span>
+                        <span className={selectedItem.delta_qty > 0 ? 'text-rose-700 dark:text-rose-400' : selectedItem.delta_qty < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}>
                           {selectedItem.delta_qty > 0 ? '+' : ''}{formatQuantity(selectedItem.delta_qty)} {selectedItem.unit}
                         </span>
                       </div>
@@ -1203,28 +1237,28 @@ Manfaat (Benefit): ${tech.benefit}`
                   </div>
 
                   {/* Pillar 3 */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                    <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                      <Calculator className="w-3.5 h-3.5 text-emerald-600" />
+                  <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Calculator className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                       3. Kajian Harga &amp; Anggaran
                     </span>
                     <div className="space-y-1.5 font-mono text-[11px]">
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-[9.5px] text-slate-500 font-sans block">Harga Satuan Unit:</span>
-                        <span className="font-bold text-slate-900">{formatRupiah(selectedItem.unit_price_revised)}</span>
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-sans block">Harga Satuan Unit:</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{formatRupiah(selectedItem.unit_price_revised)}</span>
                         {selectedItem.delta_unit_price !== 0 && (
-                          <span className="block text-[9px] text-slate-400 font-sans">
+                          <span className="block text-[9px] text-slate-400 dark:text-slate-500 font-sans">
                             Awal: {formatRupiah(selectedItem.unit_price_initial)} (Delta: {selectedItem.delta_unit_price > 0 ? '+' : ''}{formatRupiah(selectedItem.delta_unit_price)})
                           </span>
                         )}
                       </div>
-                      <div className="bg-white p-2 rounded-lg border border-slate-200">
-                        <span className="text-[9.5px] text-slate-500 font-sans block">Nilai Total Revisi:</span>
-                        <span className="font-bold text-slate-900">{formatRupiah(selectedItem.calculated_revised)}</span>
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <span className="text-[9.5px] text-slate-500 dark:text-slate-400 font-sans block">Nilai Total Revisi:</span>
+                        <span className="font-bold text-slate-900 dark:text-white">{formatRupiah(selectedItem.calculated_revised)}</span>
                       </div>
-                      <div className="bg-white p-2 rounded-lg border border-slate-200 font-bold flex justify-between">
-                        <span className="text-slate-600 font-sans text-[10px]">Delta Finansial:</span>
-                        <span className={selectedItem.delta_value > 0 ? 'text-rose-700' : selectedItem.delta_value < 0 ? 'text-emerald-700' : 'text-slate-500'}>
+                      <div className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 font-bold flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-300 font-sans text-[10px]">Delta Finansial:</span>
+                        <span className={selectedItem.delta_value > 0 ? 'text-rose-700 dark:text-rose-400' : selectedItem.delta_value < 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}>
                           {selectedItem.delta_value > 0 ? '+' : ''}{formatRupiah(selectedItem.delta_value)}
                         </span>
                       </div>
@@ -1236,64 +1270,64 @@ Manfaat (Benefit): ${tech.benefit}`
               {/* Section 1: Korelasi Baseline (Kontrak Awal) vs Aktual BAPL */}
               {selectedTech && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
-                    <Scale className="w-4 h-4 text-indigo-600" />
+                  <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold uppercase tracking-wider text-[11px]">
+                    <Scale className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                     <span>Korelasi Baseline &amp; BAPL Aktual Lapangan</span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Baseline */}
-                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
-                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                    <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-1.5">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
                         1. Kondisi Baseline (Kontrak Awal / DED):
                       </span>
-                      <p className="text-slate-800 text-xs font-medium leading-relaxed">
+                      <p className="text-slate-800 dark:text-slate-200 text-xs font-medium leading-relaxed">
                         {selectedTech.baseline}
                       </p>
                     </div>
 
                     {/* BAPL Actual */}
-                    <div className="bg-emerald-50/70 p-4 rounded-xl border border-emerald-300 space-y-1.5">
-                      <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
+                    <div className="bg-emerald-50/70 dark:bg-emerald-950/40 p-4 rounded-xl border border-emerald-300 dark:border-emerald-800 space-y-1.5">
+                      <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider block">
                         2. Kondisi Fisik Aktual (Opname BAPL):
                       </span>
-                      <p className="text-emerald-950 text-xs font-semibold leading-relaxed">
+                      <p className="text-emerald-950 dark:text-emerald-200 text-xs font-semibold leading-relaxed">
                         {selectedTech.actual_bapl}
                       </p>
                     </div>
                   </div>
 
                   {/* JusTek Usulan */}
-                  <div className="bg-blue-50/60 p-4 rounded-xl border border-blue-200 space-y-1.5">
-                    <span className="text-[10px] font-bold text-blue-800 uppercase tracking-wider block">
+                  <div className="bg-blue-50/60 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-200 dark:border-blue-800 space-y-1.5">
+                    <span className="text-[10px] font-bold text-blue-800 dark:text-cyan-300 uppercase tracking-wider block">
                       3. Usulan Justifikasi Teknis (JusTek):
                     </span>
-                    <p className="text-slate-900 text-xs leading-relaxed font-medium">
+                    <p className="text-slate-900 dark:text-white text-xs leading-relaxed font-medium">
                       {selectedTech.proposed}
                     </p>
                   </div>
 
                   {/* Cause, Risk, Benefit */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-                    <div className="p-3 rounded-xl bg-amber-50/60 border border-amber-200">
-                      <span className="text-[10px] font-bold text-amber-900 uppercase block mb-1">
+                    <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                      <span className="text-[10px] font-bold text-amber-900 dark:text-amber-300 uppercase block mb-1">
                         Penyebab (Root Cause):
                       </span>
-                      <p className="text-[11px] text-slate-700 leading-relaxed">{selectedTech.cause}</p>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{selectedTech.cause}</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-rose-50/60 border border-rose-200">
-                      <span className="text-[10px] font-bold text-rose-900 uppercase block mb-1">
+                    <div className="p-3 rounded-xl bg-rose-50/60 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800">
+                      <span className="text-[10px] font-bold text-rose-900 dark:text-rose-300 uppercase block mb-1">
                         Risiko Teknikal (Engineering Risk):
                       </span>
-                      <p className="text-[11px] text-slate-700 leading-relaxed">{selectedTech.risk}</p>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{selectedTech.risk}</p>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-200">
-                      <span className="text-[10px] font-bold text-emerald-900 uppercase block mb-1">
+                    <div className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                      <span className="text-[10px] font-bold text-emerald-900 dark:text-emerald-300 uppercase block mb-1">
                         Manfaat (Benefit):
                       </span>
-                      <p className="text-[11px] text-slate-700 leading-relaxed">{selectedTech.benefit}</p>
+                      <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{selectedTech.benefit}</p>
                     </div>
                   </div>
                 </div>
@@ -1307,31 +1341,31 @@ Manfaat (Benefit): ${tech.benefit}`
                 const effRationale = selectedItem.implicit_rationale || selectedTech?.implicit_rationale;
 
                 return (
-                  <div className="space-y-3 pt-2 border-t border-slate-200">
+                  <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
-                        <FileSearch className="w-4 h-4 text-purple-600" />
+                      <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold uppercase tracking-wider text-[11px]">
+                        <FileSearch className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         <span>Pemeriksaan Bukti Multi-Dokumen &amp; Fakta Lapangan (FAT, BA MC-0/100, BAPL, Back Up Volume)</span>
                       </div>
                       {effEvType === 'EXPLICIT' && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
                           BUKTI EKSPLISIT
                         </span>
                       )}
                       {effEvType === 'IMPLICIT' && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                           BUKTI IMPLISIT (DEDUKSI REKAYASA)
                         </span>
                       )}
                       {effEvType === 'NONE' && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 dark:bg-rose-950/70 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
                           TIDAK ADA BUKTI (Di Seluruh Dokumen yang Diunggah)
                         </span>
                       )}
                     </div>
 
                     {effSnippet && (
-                      <div className="bg-slate-900 text-slate-100 p-3.5 rounded-xl text-xs font-mono leading-relaxed border border-slate-800">
+                      <div className="bg-slate-900 text-slate-100 p-3.5 rounded-xl text-xs font-mono leading-relaxed border border-slate-800 shadow-inner">
                         <span className="text-purple-400 font-sans text-[10px] block font-bold uppercase tracking-wider mb-1">
                           Kutipan Klausul / Temuan Tertulis Dokumen Lapangan:
                         </span>
@@ -1346,8 +1380,8 @@ Manfaat (Benefit): ${tech.benefit}`
                     )}
 
                     {effRationale && (
-                      <div className="bg-purple-50 p-3 rounded-xl border border-purple-200 text-xs text-purple-950">
-                        <span className="text-purple-900 font-bold block text-[11px] mb-1">
+                      <div className="bg-purple-50 dark:bg-purple-950/40 p-3 rounded-xl border border-purple-200 dark:border-purple-800 text-xs text-purple-950 dark:text-purple-200">
+                        <span className="text-purple-900 dark:text-purple-300 font-bold block text-[11px] mb-1">
                           Penjelasan Deduksi Rekayasa (Engineering Justification Rationale):
                         </span>
                         <p className="leading-relaxed">
@@ -1361,19 +1395,19 @@ Manfaat (Benefit): ${tech.benefit}`
 
                     {effDocs.length > 0 && (
                       <div className="space-y-2 pt-1">
-                        <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider block">
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
                           Daftar {effDocs.length} Dokumen Pendukung Terverifikasi yang Saling Mengonfirmasi:
                         </span>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                           {effDocs.map((doc, dIdx) => (
-                            <div key={dIdx} className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
-                              <div className="flex items-center justify-between font-bold text-slate-800">
-                                <span className="bg-white px-2 py-0.5 rounded border border-slate-200 text-indigo-700 text-[10.5px]">
+                            <div key={dIdx} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+                              <div className="flex items-center justify-between font-bold text-slate-800 dark:text-slate-200">
+                                <span className="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 text-indigo-700 dark:text-indigo-300 text-[10.5px]">
                                   {doc.doc_type} (Hal {doc.page})
                                 </span>
-                                <span className="text-slate-500 font-medium text-[11px] truncate max-w-[180px]">{doc.doc_name}</span>
+                                <span className="text-slate-500 dark:text-slate-400 font-medium text-[11px] truncate max-w-[180px]">{doc.doc_name}</span>
                               </div>
-                              <p className="text-slate-700 italic font-mono text-[11px] leading-relaxed">
+                              <p className="text-slate-700 dark:text-slate-300 italic font-mono text-[11px] leading-relaxed">
                                 &ldquo;
                                 <HighlightedText
                                   text={doc.snippet}
@@ -1382,7 +1416,7 @@ Manfaat (Benefit): ${tech.benefit}`
                                 &rdquo;
                               </p>
                               {doc.explanation && (
-                                <p className="text-[10px] text-slate-500 border-t border-slate-200/60 pt-1 mt-1 font-sans">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 border-t border-slate-200/60 dark:border-slate-700 pt-1 mt-1 font-sans">
                                   <HighlightedText
                                     text={doc.explanation}
                                     matchTarget={[selectedItem.item]}
@@ -1399,80 +1433,80 @@ Manfaat (Benefit): ${tech.benefit}`
               })()}
 
               {/* Section 2: Audit Kalkulasi Aritmatika Detail */}
-              <div className="space-y-3 pt-2 border-t border-slate-200">
-                <div className="flex items-center gap-2 text-slate-900 font-bold uppercase tracking-wider text-[11px]">
-                  <Calculator className="w-4 h-4 text-emerald-600" />
+              <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold uppercase tracking-wider text-[11px]">
+                  <Calculator className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Rincian Kalkulasi Aritmatika (Step-by-Step)</span>
                 </div>
 
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 font-mono space-y-3">
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700 font-mono space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                    <div className="bg-white p-3 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-500 font-sans block">Volume &amp; Satuan</span>
-                      <span className="font-bold text-slate-900">
+                    <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-sans block">Volume &amp; Satuan</span>
+                      <span className="font-bold text-slate-900 dark:text-white">
                         {formatQuantity(selectedItem.qty_initial)} {selectedItem.unit} &rarr;{' '}
                         {formatQuantity(selectedItem.qty_revised)} {selectedItem.unit}
                       </span>
-                      <span className="text-[10px] text-blue-600 block mt-0.5">
+                      <span className="text-[10px] text-blue-600 dark:text-cyan-400 block mt-0.5">
                         Delta: {selectedItem.delta_qty > 0 ? '+' : ''}
                         {formatQuantity(selectedItem.delta_qty)} {selectedItem.unit}
                       </span>
                     </div>
 
-                    <div className="bg-white p-3 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-500 font-sans block">Harga Satuan Unit</span>
-                      <span className="font-bold text-slate-900 block text-xs">
+                    <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-sans block">Harga Satuan Unit</span>
+                      <span className="font-bold text-slate-900 dark:text-white block text-xs">
                         {formatRupiah(selectedItem.unit_price_initial)} &rarr; {formatRupiah(selectedItem.unit_price_revised)}
                       </span>
-                      <span className="text-[10px] text-blue-600 block mt-0.5 font-sans font-semibold">
+                      <span className="text-[10px] text-blue-600 dark:text-cyan-400 block mt-0.5 font-sans font-semibold">
                         Delta Satuan: {selectedItem.delta_unit_price > 0 ? '+' : ''}
                         {formatRupiah(selectedItem.delta_unit_price)} / {selectedItem.unit}
                       </span>
                     </div>
 
-                    <div className="bg-white p-3 rounded-lg border border-slate-200">
-                      <span className="text-[10px] text-slate-500 font-sans block">Delta Finansial Total</span>
+                    <div className="bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-sans block">Delta Finansial Total</span>
                       <span
                         className={`font-bold block ${
                           selectedItem.delta_value < 0
-                            ? 'text-emerald-700'
+                            ? 'text-emerald-700 dark:text-emerald-400'
                             : selectedItem.delta_value > 0
-                            ? 'text-rose-700'
-                            : 'text-slate-600'
+                            ? 'text-rose-700 dark:text-rose-400'
+                            : 'text-slate-600 dark:text-slate-400'
                         }`}
                       >
                         {formatRupiah(selectedItem.delta_value)}
                       </span>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 block mt-0.5">
                         ({formatPercentage(selectedItem.delta_percentage, 2)} dari Total Awal)
                       </span>
                     </div>
                   </div>
 
                   {/* Formula Breakdown */}
-                  <div className="p-3 bg-white rounded-lg border border-slate-200 text-[11px] space-y-1.5">
+                  <div className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-[11px] space-y-1.5">
                     <div className="flex justify-between">
-                      <span className="text-slate-500 font-sans">Total Awal (Qty Awal × Harga Awal):</span>
-                      <span className="text-slate-700">
+                      <span className="text-slate-500 dark:text-slate-400 font-sans">Total Awal (Qty Awal × Harga Awal):</span>
+                      <span className="text-slate-700 dark:text-slate-300">
                         {formatQuantity(selectedItem.qty_initial)} {selectedItem.unit} × {formatRupiah(selectedItem.unit_price_initial)} ={' '}
-                        <strong className="text-slate-900">{formatRupiah(selectedItem.calculated_initial)}</strong>
+                        <strong className="text-slate-900 dark:text-white">{formatRupiah(selectedItem.calculated_initial)}</strong>
                       </span>
                     </div>
-                    <div className="flex justify-between border-t border-slate-100 pt-1">
-                      <span className="text-slate-500 font-sans">Total Revisi (Qty Revisi × Harga Revisi):</span>
-                      <span className="text-slate-700">
+                    <div className="flex justify-between border-t border-slate-100 dark:border-slate-700 pt-1">
+                      <span className="text-slate-500 dark:text-slate-400 font-sans">Total Revisi (Qty Revisi × Harga Revisi):</span>
+                      <span className="text-slate-700 dark:text-slate-300">
                         {formatQuantity(selectedItem.qty_revised)} {selectedItem.unit} × {formatRupiah(selectedItem.unit_price_revised)} ={' '}
-                        <strong className="text-emerald-800 font-bold">{formatRupiah(selectedItem.calculated_revised)}</strong>
+                        <strong className="text-emerald-800 dark:text-emerald-400 font-bold">{formatRupiah(selectedItem.calculated_revised)}</strong>
                       </span>
                     </div>
-                    <div className="flex justify-between border-t border-slate-100 pt-1 font-bold">
-                      <span className="text-slate-700 font-sans">Selisih Total (Revisi - Awal):</span>
-                      <span className={selectedItem.delta_value > 0 ? 'text-rose-700' : 'text-emerald-700'}>
+                    <div className="flex justify-between border-t border-slate-100 dark:border-slate-700 pt-1 font-bold">
+                      <span className="text-slate-700 dark:text-slate-300 font-sans">Selisih Total (Revisi - Awal):</span>
+                      <span className={selectedItem.delta_value > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'}>
                         {selectedItem.delta_value > 0 ? '+' : ''}{formatRupiah(selectedItem.delta_value)}
                       </span>
                     </div>
                     {selectedItem.delta_unit_price !== 0 && (
-                      <div className="text-[10px] text-slate-500 font-sans bg-slate-50 p-2 rounded border border-slate-100 mt-1">
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-sans bg-slate-50 dark:bg-slate-900 p-2 rounded border border-slate-100 dark:border-slate-800 mt-1">
                         *Catatan Audit: Selisih harga satuan adalah {selectedItem.delta_unit_price > 0 ? '+' : ''}{formatRupiah(selectedItem.delta_unit_price)} per {selectedItem.unit}. Untuk {formatQuantity(selectedItem.qty_revised)} {selectedItem.unit}, total delta finansial bernilai {formatRupiah(selectedItem.delta_value)} ({formatPercentage(selectedItem.delta_percentage, 2)}).
                       </div>
                     )}
@@ -1481,13 +1515,13 @@ Manfaat (Benefit): ${tech.benefit}`
               </div>
 
               {/* Section 3: Justifikasi Finansial Lengkap */}
-              <div className="space-y-2 pt-2 border-t border-slate-200">
-                <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                  <FileCheck className="w-4 h-4 text-blue-600" />
+              <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <span className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <FileCheck className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
                   Teks Lengkap Justifikasi Finansial
                 </span>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                  <p className="text-slate-800 leading-relaxed text-xs whitespace-pre-wrap">
+                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <p className="text-slate-800 dark:text-slate-200 leading-relaxed text-xs whitespace-pre-wrap">
                     {selectedItem.justification}
                   </p>
                 </div>
@@ -1495,14 +1529,14 @@ Manfaat (Benefit): ${tech.benefit}`
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-              <span className="text-[11px] text-slate-500">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 Dokumen referensi: Lembar BAPL Fisik &amp; Dokumen JusFin
               </span>
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-2xs"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500 transition-colors shadow-2xs cursor-pointer"
               >
                 Tutup
               </button>

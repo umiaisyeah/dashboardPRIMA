@@ -1,5 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { FileText, Copy, Check, Filter, Download, Search, Sparkles, CheckCircle2, ShieldCheck } from 'lucide-react';
+import {
+  FileText,
+  Copy,
+  Check,
+  Download,
+  Search,
+  ShieldCheck,
+  Layers,
+} from 'lucide-react';
 import { RawBaplPage } from '../types';
 
 interface RawBaplViewProps {
@@ -15,8 +23,7 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
 
   // Group pages by source document
   const sources = useMemo(() => {
-    const s = Array.from(new Set(pages.map((p) => p.source || 'BAPL Utama')));
-    return s;
+    return Array.from(new Set(pages.map((p) => p.source || 'BAPL Utama')));
   }, [pages]);
 
   const filteredPages = useMemo(() => {
@@ -67,7 +74,9 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
       .map(
         (p) =>
           `========================================================================\n` +
-          `DOKUMEN: ${p.source} | HALAMAN: ${p.page} | OCR CONFIDENCE: ${Math.round(p.ocr_confidence * 100)}%\n` +
+          `DOKUMEN: ${p.source} | HALAMAN: ${p.page} | OCR CONFIDENCE: ${Math.round(
+            p.ocr_confidence * 100
+          )}%\n` +
           `========================================================================\n\n` +
           `${p.extracted_text}\n\n`
       )
@@ -82,56 +91,64 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
     URL.revokeObjectURL(url);
   };
 
+  // Helper to render text with search term highlights
+  const renderHighlightedText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+    const parts = text.split(new RegExp(`(${query.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
+    return parts.map((part, i) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <mark
+          key={i}
+          className="bg-yellow-300 dark:bg-yellow-500 text-slate-950 px-1 py-0.5 rounded font-bold"
+        >
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+      {/* Header & Controls Toolbar */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Multimodal OCR Vision Verified
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-950/80 text-[#0054a6] dark:text-[#38bdf8] border border-blue-200 dark:border-blue-800">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0054a6] dark:text-[#38bdf8]" />
+                Multimodal OCR Vision Engine
               </span>
-              <span className="text-xs text-slate-400 font-mono">
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                 Total {pages.length} Halaman Terpindai
               </span>
             </div>
-            <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2 mt-1.5">
-              <FileText className="w-5 h-5 text-slate-700" />
-              Hasil Transkrip OCR Dokumen BAPL
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2 mt-1.5">
+              <FileText className="w-5 h-5 text-[#0054a6] dark:text-[#38bdf8]" />
+              Hasil Ekstraksi OCR &amp; Raw BAPL
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Transkrip lengkap hasil pembacaan teks ketikan form baku, catatan tulisan tangan pengawas lapangan, angka pengukuran opname, dan stempel dokumen BAPL.
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              Transkrip hasil pembacaan teks fisik, tabel pekerjaan, nomor berita acara, dan catatan lapangan Berita Acara Pemeriksaan Lapangan (BAPL).
             </p>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Cari kata di transkrip..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-lg text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 w-48 sm:w-56"
-              />
-            </div>
-
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors"
+              title="Salin teks halaman yang aktif"
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-emerald-700">Tersalin!</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-emerald-700 dark:text-emerald-300">Tersalin ke Clipboard!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Salin Halaman</span>
+                  <Copy className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  <span>Salin Teks Halaman</span>
                 </>
               )}
             </button>
@@ -139,174 +156,137 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
             <button
               type="button"
               onClick={handleDownloadAll}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
+              title="Unduh seluruh transkrip OCR ke file TXT"
             >
-              <Download className="w-3.5 h-3.5 text-blue-600" />
-              <span>Unduh TXT Semua Hal</span>
+              <Download className="w-3.5 h-3.5 text-[#0054a6] dark:text-[#38bdf8]" />
+              <span>Unduh TXT Lengkap</span>
             </button>
           </div>
         </div>
 
-        {/* Source Document Filter Tabs */}
-        {sources.length > 1 && (
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 overflow-x-auto">
-            <span className="text-xs font-bold text-slate-500 flex items-center gap-1 shrink-0">
-              <Filter className="w-3.5 h-3.5" />
-              Dokumen:
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedSource('ALL');
-                if (pages.length > 0) {
-                  setSelectedPageKey(getPageKey(pages[0], 0));
-                }
-              }}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all shrink-0 ${
-                selectedSource === 'ALL'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+        {/* Search Bar & Source Filter */}
+        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative w-full sm:w-96">
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Cari kata kunci di seluruh transkrip OCR..."
+              className="w-full pl-10 pr-8 py-2 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00aded] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Filter Dokumen:</span>
+            <select
+              value={selectedSource}
+              onChange={(e) => setSelectedSource(e.target.value)}
+              className="px-3 py-1.5 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#00aded]"
             >
-              Semua Berkas ({pages.length} Hal)
-            </button>
-            {sources.map((src, idx) => {
-              const count = pages.filter((p) => p.source === src).length;
-              return (
-                <button
-                  key={`src_${src}_${idx}`}
-                  type="button"
-                  onClick={() => {
-                    setSelectedSource(src);
-                    const firstInDocIdx = pages.findIndex((p) => p.source === src);
-                    if (firstInDocIdx >= 0) {
-                      setSelectedPageKey(getPageKey(pages[firstInDocIdx], firstInDocIdx));
-                    }
-                  }}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all shrink-0 max-w-xs truncate ${
-                    selectedSource === src
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                  title={src}
-                >
-                  📄 {src} ({count} Hal)
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Viewer Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Page selector sidebar */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-2">
-          <div className="flex items-center justify-between px-2 mb-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-              Daftar Halaman ({filteredPages.length})
-            </span>
-          </div>
-          <div className="space-y-1 max-h-[620px] overflow-y-auto pr-1">
-            {filteredPages.map((p, pIdx) => {
-              const key = getPageKey(p, pIdx);
-              const isSelected = selectedPageKey === key;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSelectedPageKey(key)}
-                  className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-all ${
-                    isSelected
-                      ? 'bg-slate-900 text-white font-bold shadow-xs'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0 pr-1">
-                    <FileText className="w-3.5 h-3.5 opacity-70 shrink-0" />
-                    <div className="truncate">
-                      <p className="truncate leading-tight">Halaman {p.page}</p>
-                      {sources.length > 1 && (
-                        <p
-                          className={`text-[9px] truncate font-mono mt-0.5 ${
-                            isSelected ? 'text-slate-300' : 'text-slate-400'
-                          }`}
-                        >
-                          {p.source}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <span
-                    className={`text-[10px] font-mono shrink-0 ml-1 ${
-                      isSelected ? 'text-emerald-400 font-bold' : 'text-slate-400'
-                    }`}
-                  >
-                    {Math.round(p.ocr_confidence * 100)}%
-                  </span>
-                </button>
-              );
-            })}
+              <option value="ALL">Semua Berkas ({pages.length} Halaman)</option>
+              {sources.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Page Content View */}
-        <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 mb-4 text-xs gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-bold text-slate-900 font-mono px-2.5 py-1 rounded bg-slate-100 border border-slate-200">
-                  HALAMAN {activePage?.page}
-                </span>
-                <span className="text-slate-600 font-medium truncate max-w-md">
-                  Dokumen: {activePage?.source || 'BAPL Utama'}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Akurasi OCR: {Math.round((activePage?.ocr_confidence || 0.95) * 100)}%
-                </span>
-                {activePage?.detected_ink_colors && activePage.detected_ink_colors.map((ink, i) => (
-                  <span
-                    key={`ink_${ink}_${i}`}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                      ink.toLowerCase().includes('biru') || ink.toLowerCase().includes('blue')
-                        ? 'bg-blue-50 text-blue-800 border-blue-200'
-                        : ink.toLowerCase().includes('merah') || ink.toLowerCase().includes('red')
-                        ? 'bg-rose-50 text-rose-800 border-rose-200'
-                        : 'bg-slate-100 text-slate-800 border-slate-300'
-                    }`}
-                  >
-                    {ink.toLowerCase().includes('biru') || ink.toLowerCase().includes('blue')
-                      ? '🔵'
-                      : ink.toLowerCase().includes('merah') || ink.toLowerCase().includes('red')
-                      ? '🔴'
-                      : '✍️'} {ink}
-                  </span>
-                ))}
-                {activePage?.has_visual_elements && (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
-                    📐 Sketsa / Foto Fisik
-                  </span>
-                )}
-              </div>
-            </div>
+        {/* Page Selector Strip */}
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+          {filteredPages.map((p, idx) => {
+            const key = getPageKey(p, idx);
+            const isSelected = key === selectedPageKey;
+            const pct = Math.round(p.ocr_confidence * 100);
 
-            {/* OCR Transcribed Text Box */}
-            <div className="bg-slate-950 border border-slate-800 rounded-xl p-6 font-mono text-xs text-slate-100 leading-relaxed whitespace-pre-wrap max-h-[580px] overflow-y-auto shadow-inner select-text">
-              {activePage?.extracted_text}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between">
-            <span>Jumlah Karakter: {activePage?.extracted_text?.length || 0} karakter</span>
-            <span className="font-medium text-emerald-700 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              Transkripsi Berita Acara Peninjauan Lapangan (BAPL) Siap Audit
-            </span>
-          </div>
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSelectedPageKey(key)}
+                className={`px-3 py-2 rounded-xl text-xs font-semibold shrink-0 transition-all border flex items-center gap-2 ${
+                  isSelected
+                    ? 'border-[#0054a6] dark:border-cyan-400 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/70 dark:to-cyan-950/70 text-[#004690] dark:text-cyan-200 shadow-xs'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                }`}
+              >
+                <span>Hal. {p.page}</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">
+                  {pct}%
+                </span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-400 max-w-[110px] truncate">
+                  {p.source || 'BAPL'}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* OCR Content Card */}
+      {activePage ? (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col transition-colors">
+          {/* Top Info Banner */}
+          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                <Layers className="w-4 h-4 text-[#0054a6] dark:text-[#38bdf8]" />
+                Dokumen: {activePage.source || 'BAPL Utama'}
+              </span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">·</span>
+              <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 font-mono">
+                Halaman {activePage.page}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                <span>Skor Akurasi OCR:</span>
+                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {Math.round(activePage.ocr_confidence * 100)}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Search Result Counter */}
+          {searchTerm && (
+            <div className="px-6 py-2.5 bg-yellow-50 dark:bg-yellow-950/40 border-b border-yellow-200 dark:border-yellow-900/60 text-xs text-yellow-900 dark:text-yellow-200 flex items-center justify-between">
+              <span>
+                Menampilkan hasil pencarian untuk: <strong>"{searchTerm}"</strong>
+              </span>
+              <span className="font-mono font-bold">
+                {(activePage.extracted_text.match(new RegExp(searchTerm, 'gi')) || []).length} kecocokan pada halaman ini
+              </span>
+            </div>
+          )}
+
+          {/* Preformatted OCR Text Content */}
+          <div className="p-6 sm:p-8 bg-slate-50/40 dark:bg-slate-950/80 overflow-auto max-h-[750px]">
+            <div className="p-5 sm:p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-mono text-xs sm:text-sm text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-wrap select-text shadow-xs">
+              {renderHighlightedText(activePage.extracted_text, searchTerm)}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Tidak ada halaman yang cocok dengan filter pencarian "{searchTerm}".
+          </p>
+        </div>
+      )}
     </div>
   );
 };

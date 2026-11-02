@@ -376,56 +376,47 @@ export const RawBaplView: React.FC<RawBaplViewProps> = ({ pages, initialPage = 1
 
         {/* Footnote / Accuracy Implications Legend */}
         <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 rounded-xl p-3.5">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">
-            <Info className="w-4 h-4 text-[#0054a6] dark:text-[#38bdf8]" />
-            <span>Catatan Panduan Metode Ekstraksi &amp; Implikasi Akurasi OCR:</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-100">
+              <Info className="w-4 h-4 text-[#0054a6] dark:text-[#38bdf8]" />
+              <span>Konfigurasi Pipeline OCR: Mode Eksklusif Text Layer &amp; Cloud AI Vision</span>
+            </div>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Cache &amp; Tesseract Dinonaktifkan
+            </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             {/* Text Layer */}
-            <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-sky-200 dark:border-sky-900/60">
-              <div className="flex items-center gap-1.5 font-bold text-sky-700 dark:text-sky-300">
-                <FileText className="w-3.5 h-3.5 text-sky-500" />
-                <span>Text Layer (Digital)</span>
-                <span className="text-[10px] text-sky-600 dark:text-sky-400 font-normal">~100%</span>
+            <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-sky-300 dark:border-sky-800/80 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-bold text-sky-700 dark:text-sky-300">
+                  <FileText className="w-4 h-4 text-sky-500" />
+                  <span>1. Text Layer (PDF Digital)</span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-md font-bold bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                  Akurasi ~100%
+                </span>
               </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
-                Diekstrak langsung dari data PDF asli. Nilai angka dan teks presisi tanpa deviasi optik.
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
+                Teks diekstrak langsung dari layer vektor data PDF naskah asli (bukan citra optik). Seluruh nilai angka, satuan, spesifikasi, dan tabel terjaga presisi 100% tanpa risiko salah baca dan tanpa konsumsi kuota AI.
               </p>
             </div>
 
             {/* Cloud AI Vision */}
-            <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-900/60">
-              <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                <span>Cloud AI Vision</span>
-                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-normal">95–99%</span>
+            <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-indigo-300 dark:border-indigo-800/80 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-bold text-indigo-700 dark:text-indigo-300">
+                  <Sparkles className="w-4 h-4 text-indigo-500" />
+                  <span>2. Cloud AI Vision</span>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-md font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  Akurasi 95%–99%
+                </span>
               </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
-                Multimodal AI mutakhir. Optimal untuk tabel teknis padat, stempel basah, dan tulisan tangan.
-              </p>
-            </div>
-
-            {/* Cache Supabase */}
-            <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-900/60">
-              <div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-300">
-                <Database className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Cache SHA-256</span>
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">Identik</span>
-              </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
-                Hasil verifikasi hash terdahulu yang dimuat instan tanpa menggunakan kuota tambahan.
-              </p>
-            </div>
-
-            {/* Tesseract OCR Lokal */}
-            <div className="p-2.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800">
-              <div className="flex items-center gap-1.5 font-bold text-amber-800 dark:text-amber-200">
-                <Cpu className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span>Tesseract (Lokal)</span>
-                <span className="text-[10px] text-amber-700 dark:text-amber-300 font-normal">70–85%</span>
-              </div>
-              <p className="text-[11px] text-amber-900/90 dark:text-amber-200/90 mt-1 leading-snug">
-                <strong>Implikasi Akurasi:</strong> Fallback cadangan saat kuota habis. Tulisan tangan, cap tumpang tindih, dan tabel rapat berpotensi mengalami salah baca karakter.
+              <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1.5 leading-relaxed">
+                Dipakai khusus untuk berkas pindaian (scan) dan gambar visual. Menggunakan multimodal vision untuk merekonstruksi tabel teknis kompleks, catatan tangan tinta biru/merah, paraf pengawas lapangan, dan cap stempel resmi.
               </p>
             </div>
           </div>

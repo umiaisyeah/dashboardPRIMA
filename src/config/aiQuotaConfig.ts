@@ -1,9 +1,19 @@
 /**
  * Configuration for AI Cloud Quota & OCR Optimization
  * Mengatur laju pemanggilan AI Cloud, ambang batas teks digital, dan parameter kompresi.
+ * Konfigurasi terkini: HANYA menggunakan Text Layer Digital dan Cloud AI Vision.
+ * Cache dan Tesseract dinonaktifkan.
  */
 
 export const AI_QUOTA_CONFIG = {
+  /**
+   * Mode pipeline ekstraksi aktif.
+   * Hanya Text Layer Digital dan Cloud AI Vision yang diaktifkan.
+   */
+  ENABLE_CACHE: false,
+  ENABLE_TESSERACT: false,
+  ACTIVE_PIPELINE_ENGINES: ['text_layer', 'cloud_ai'] as const,
+
   /**
    * Batas maksimal pemanggilan paralel ke AI Cloud secara bersamaan.
    * Nilai ini mudah diubah di satu konstanta untuk menyesuaikan batas kuota API.
@@ -11,7 +21,7 @@ export const AI_QUOTA_CONFIG = {
   MAX_CONCURRENT_AI_CALLS: 2,
 
   /**
-   * Parameter retry dengan exponential backoff dan jitter.
+   * Parameter retry dengan exponential backoff dan jitter untuk Cloud AI.
    */
   RETRY: {
     maxRetries: 3,
@@ -36,8 +46,8 @@ export const AI_QUOTA_CONFIG = {
 
   /**
    * Optimasi dimensi canvas dan kompresi JPEG sebelum dikirim ke AI Cloud.
-   * Resolusi 1600px sudah sangat tajam untuk membaca teks tabel dan tulisan tangan,
-   * sekaligus menghemat 70-80% ukuran transfer data dan token gambar.
+   * Resolusi 1600px tajam untuk membaca teks tabel dan tulisan tangan,
+   * sekaligus menghemat ukuran transfer data dan token gambar.
    */
   IMAGE_OPTIMIZATION: {
     maxDimension: 1600,
@@ -47,7 +57,7 @@ export const AI_QUOTA_CONFIG = {
   /**
    * Kriteria kelayakan text layer digital (pdf.js).
    * Jika teks halaman melebihi ambang batas ini dan terbaca wajar,
-   * AI Cloud dan Tesseract sama sekali tidak akan dipanggil.
+   * AI Cloud sama sekali tidak akan dipanggil (menghemat kuota 100%).
    */
   TEXT_LAYER_CRITERIA: {
     minCharacters: 80,
@@ -56,7 +66,7 @@ export const AI_QUOTA_CONFIG = {
   },
 
   /**
-   * Bahasa untuk Tesseract OCR lokal cadangan (Indonesia + Inggris).
+   * Bahasa untuk Tesseract OCR lokal (dinonaktifkan).
    */
   TESSERACT_LANGUAGES: 'ind+eng',
 };

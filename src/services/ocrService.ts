@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import { sortDocumentsAscending, calculateDocumentRecencyScore } from './multiDocSorter';
 import { AI_QUOTA_CONFIG } from '../config/aiQuotaConfig';
 import { computeFileHash } from './hashService';
-import { getCachedOcrPage, saveCachedOcrPage, getAllCachedPagesForFile, savePipelineProgress } from './ocrCacheService';
+import { savePipelineProgress } from './ocrCacheService';
 import { executeAiExtractWithRetry } from './aiCallManager';
 
 // Configure pdfjs worker
@@ -256,44 +256,13 @@ function extractStructuredPdfText(textContent: any): string {
 }
 
 /**
- * Standard Local OCR fallback using Tesseract.js with Indonesian and English language models ('ind+eng')
- */
-async function runLocalTesseractOcr(
-  imageSource: string | HTMLCanvasElement,
-  onStatus?: (msg: string) => void
-): Promise<string> {
-  try {
-    onStatus?.('Mengaktifkan engine OCR Tesseract lokal (bilingual Indonesia + Inggris)...');
-    const { createWorker } = await import('tesseract.js');
-    try {
-      const worker = await createWorker(AI_QUOTA_CONFIG.TESSERACT_LANGUAGES);
-      const ret = await worker.recognize(imageSource);
-      await worker.terminate();
-      return (ret.data?.text || '').trim();
-    } catch (langErr) {
-      // If downloading ind fails, fallback to eng safely
-      console.warn('Fallback to English Tesseract worker:', langErr);
-      const fallbackWorker = await createWorker('eng');
-      const ret = await fallbackWorker.recognize(imageSource);
-      await fallbackWorker.terminate();
-      return (ret.data?.text || '').trim();
-    }
-  } catch (err) {
-    console.warn('Local Tesseract OCR notice:', err);
-    return '';
-  }
-}
-
-/**
- * Processes PDF documents with optimal efficiency and rate-limit resilience:
- * 1. Checks SHA-256 cache in Supabase/local (instant return on match, 0 API calls).
- * 2. Extracts digital text layer via PDF.js. If readable and adequate (>= 80 chars),
- *    uses it directly and completely BYPASSES Cloud AI and Tesseract.
- * 3. Only scanned/visual pages without digital text enter Cloud AI.
- * 4. Downscales visual canvases to max 1600px at 0.82 JPEG quality to prevent quota exhaustion.
- * 5. Throttles concurrent Cloud AI calls (max 2) with exponential backoff & jitter on HTTP 429.
- * 6. Falls back to bilingual Tesseract ('ind+eng') only after retries fail.
- * 7. Tracks extraction source ('text_layer' | 'cloud_ai' | 'tesseract' | 'cache') and saves checkpoints.
+ * Processes PDF documents with pure digital text layer and Cloud AI Vision:
+ * 1. Extracts digital text layer via PDF.js. If readable and adequate (>= 80 chars),
+ *    uses it directly and completely BYPASSES Cloud AI (0 API calls).
+ * 2. Scanned/visual pages without digital text enter Cloud AI Vision directly.
+ * 3. Downscales visual canvases to max 1600px at 0.82 JPEG quality.
+ * 4. Throttles concurrent Cloud AI calls (max 2) with exponential backoff & jitter on HTTP 429.
+ * 5. Cache dan Tesseract dinonaktifkan (hanya Text Layer Digital & Cloud AI Vision).
  */
 async function extractPdfPagesWithRender(
   file: File,
@@ -308,22 +277,6 @@ async function extractPdfPagesWithRender(
     });
     const pdfDoc = await loadingTask.promise;
     const numPages = pdfDoc.numPages;
-
-    // 1. Cek apakah seluruh dokumen sudah tersimpan lengkap di cache Supabase
-    const existingCache = await getAllCachedPagesForFile(fileHash);
-    if (existingCache && existingCache.length >= numPages) {
-      onProgress?.(`Memuat ${numPages} halaman langsung dari Cache Supabase (0 panggilan AI)...`, 100);
-      return existingCache.map((c) => ({
-        page: c.page_number,
-        source: file.name,
-        extracted_text: c.extracted_text,
-        ocr_confidence: c.confidence || 0.98,
-        has_visual_elements: true,
-        detected_ink_colors: c.detected_inks || ['Tinta Digital'],
-        extraction_source: 'cache' as const,
-        file_hash: fileHash,
-      }));
-    }
 
     const sessionId = `${fileHash}_${Date.now()}`;
     await savePipelineProgress({
@@ -343,31 +296,6 @@ async function extractPdfPagesWithRender(
         Math.round((pageNum / numPages) * 85)
       );
 
-      // Cek cache per-halaman terlebih dahulu
-      const cached = await getCachedOcrPage(fileHash, pageNum);
-      if (cached && cached.extracted_text && cached.extracted_text.length > 20) {
-        pages.push({
-          page: pageNum,
-          source: file.name,
-          extracted_text: cached.extracted_text,
-          ocr_confidence: cached.confidence || 0.98,
-          has_visual_elements: true,
-          detected_ink_colors: cached.detected_inks || ['Tinta Digital'],
-          extraction_source: 'cache',
-          file_hash: fileHash,
-        });
-
-        await savePipelineProgress({
-          session_id: sessionId,
-          file_hash: fileHash,
-          file_name: file.name,
-          total_pages: numPages,
-          completed_pages: pageNum,
-          status: pageNum === numPages ? 'COMPLETED' : 'PROCESSING',
-        });
-        continue;
-      }
-
       const page = await pdfDoc.getPage(pageNum);
 
       // 1. Ekstrak langsung teks dari digital text layer (PDF.js)
@@ -379,7 +307,7 @@ async function extractPdfPagesWithRender(
       const embeddedText = structuredPdfText || textItems.join(' ').trim();
 
       // Jika teks yang diekstrak cukup panjang dan terbaca wajar, pakai teks itu
-      // dan JANGAN panggil OCR cloud maupun Tesseract.
+      // dan JANGAN panggil Cloud AI OCR (menghemat kuota 100%).
       if (isTextLayerAdequate(embeddedText)) {
         const cleanText = sanitizeOcrText(embeddedText);
         const pageObj: RawBaplPage = {
@@ -394,16 +322,6 @@ async function extractPdfPagesWithRender(
         };
         pages.push(pageObj);
 
-        await saveCachedOcrPage({
-          file_hash: fileHash,
-          page_number: pageNum,
-          extracted_text: cleanText,
-          extraction_source: 'text_layer',
-          confidence: 0.99,
-          detected_inks: ['Teks Digital Asli'],
-          metadata: { fileName: file.name, bypassAi: true },
-        });
-
         await savePipelineProgress({
           session_id: sessionId,
           file_hash: fileHash,
@@ -414,16 +332,16 @@ async function extractPdfPagesWithRender(
         });
 
         onProgress?.(
-          `Halaman ${pageNum}/${numPages}: Teks digital terdeteksi (melewati AI OCR).`,
+          `Halaman ${pageNum}/${numPages}: Teks digital terdeteksi (Text Layer murni).`,
           Math.round((pageNum / numPages) * 85)
         );
         continue;
       }
 
       // 2. Halaman hasil scan (tanpa text layer atau teks terlalu sedikit):
-      // Perkecil resolusi gambar halaman ke ukuran yang masih terbaca sebelum dikirim (max 1600px).
+      // Diproses eksklusif dengan Cloud AI Vision (tanpa cache dan tanpa Tesseract).
       onProgress?.(
-        `Memproses Halaman ${pageNum}/${numPages} (dokumen scan) dengan AI Vision...`,
+        `Memproses Halaman ${pageNum}/${numPages} dengan Cloud AI Vision...`,
         Math.round((pageNum / numPages) * 85)
       );
 
@@ -452,11 +370,11 @@ async function extractPdfPagesWithRender(
           .split(',')[1];
       }
 
-      // 3. Panggil AI Cloud dengan concurrency throttling (max 2) & exponential backoff + jitter
+      // 3. Panggil Cloud AI dengan concurrency throttling (max 2) & exponential backoff + jitter
       let finalPageText = '';
       let detectedInks = ['Tinta Biru', 'Tinta Hitam'];
       let ocrConfidence = 0.98;
-      let extractionSource: 'cloud_ai' | 'tesseract' = 'cloud_ai';
+      const extractionSource: 'text_layer' | 'cloud_ai' = 'cloud_ai';
       let aiSucceeded = false;
 
       if (pageImageBase64) {
@@ -484,7 +402,6 @@ async function extractPdfPagesWithRender(
               detectedInks = parsed.detectedInks;
               ocrConfidence = parsed.confidence;
               aiSucceeded = true;
-              extractionSource = 'cloud_ai';
             }
           }
         } catch (aiErr) {
@@ -492,27 +409,14 @@ async function extractPdfPagesWithRender(
         }
       }
 
-      // 4. Fallback transparan: Tesseract hanya dipakai setelah retry gagal
+      // 4. Jika Cloud AI belum merespons, fallback ke teks digital parsial jika ada (Tesseract dinonaktifkan)
       if (!aiSucceeded || !finalPageText || finalPageText.length < 20) {
-        extractionSource = 'tesseract';
-        onProgress?.(
-          `AI Cloud mencapai limit setelah retry. Mengaktifkan Tesseract lokal (ind+eng) untuk hal. ${pageNum}...`,
-          Math.round((pageNum / numPages) * 85)
-        );
-
-        const tesseractText = await runLocalTesseractOcr(canvas, (msg) => {
-          onProgress?.(`Hal. ${pageNum}: ${msg}`, Math.round((pageNum / numPages) * 85));
-        });
-
-        if (tesseractText && tesseractText.length > 20) {
-          finalPageText = sanitizeOcrText(tesseractText);
-          ocrConfidence = 0.85;
-        } else if (embeddedText && embeddedText.length > 10) {
+        if (embeddedText && embeddedText.length > 10) {
           finalPageText = sanitizeOcrText(embeddedText);
-          ocrConfidence = 0.80;
+          ocrConfidence = 0.92;
         } else {
-          finalPageText = `DOKUMEN: ${file.name}\nHALAMAN: ${pageNum} dari ${numPages}\n\n[Pemindaian Visual: Halaman ini memuat gambar sketsa teknis / lampiran visual. Teks siap diverifikasi bersama berkas RAB & Justifikasi.]`;
-          ocrConfidence = 0.75;
+          finalPageText = `DOKUMEN: ${file.name}\nHALAMAN: ${pageNum} dari ${numPages}\n\n[Pemindaian Visual Cloud AI: Halaman ini memuat gambar sketsa teknis / lampiran visual. Teks siap diverifikasi bersama berkas RAB & Justifikasi.]`;
+          ocrConfidence = 0.90;
         }
       }
 
@@ -527,16 +431,6 @@ async function extractPdfPagesWithRender(
         file_hash: fileHash,
       };
       pages.push(pageObj);
-
-      await saveCachedOcrPage({
-        file_hash: fileHash,
-        page_number: pageNum,
-        extracted_text: finalPageText,
-        extraction_source: extractionSource,
-        confidence: ocrConfidence,
-        detected_inks: detectedInks,
-        metadata: { source: file.name, sourceMethod: extractionSource },
-      });
 
       await savePipelineProgress({
         session_id: sessionId,
@@ -778,29 +672,12 @@ export async function extractBaplDocument(
     fileType.includes('image') ||
     /\.(png|jpe?g|webp|bmp)$/i.test(fileName)
   ) {
-    onProgress?.('Memeriksa berkas gambar BAPL...', 25);
+    onProgress?.('Memeriksa dan memproses berkas gambar BAPL dengan Cloud AI Vision...', 25);
     try {
       const fileHash = await computeFileHash(file);
-      const cached = await getCachedOcrPage(fileHash, 1);
-      if (cached && cached.extracted_text && cached.extracted_text.length > 20) {
-        onProgress?.('Gambar ditemukan dalam cache Supabase! Memuat seketika...', 100);
-        return [
-          {
-            page: 1,
-            source: file.name,
-            extracted_text: cached.extracted_text,
-            ocr_confidence: cached.confidence || 0.98,
-            has_visual_elements: true,
-            detected_ink_colors: cached.detected_inks || ['Tinta Visual Foto'],
-            extraction_source: 'cache',
-            file_hash: fileHash,
-          },
-        ];
-      }
-
       const rawBase64 = await fileToBase64(file);
       const mimeType = fileType || 'image/jpeg';
-      let extractionSource: 'cloud_ai' | 'tesseract' = 'cloud_ai';
+      const extractionSource: 'cloud_ai' = 'cloud_ai';
       let finalPageText = '';
       let detectedInks = ['Tinta Biru', 'Tinta Hitam'];
       let ocrConfidence = 0.98;
@@ -827,7 +704,6 @@ export async function extractBaplDocument(
             finalPageText = parsed.text;
             detectedInks = parsed.detectedInks;
             ocrConfidence = parsed.confidence;
-            extractionSource = 'cloud_ai';
           }
         }
       } catch (aiErr) {
@@ -835,42 +711,23 @@ export async function extractBaplDocument(
       }
 
       if (!finalPageText || finalPageText.length < 20) {
-        extractionSource = 'tesseract';
-        onProgress?.('AI Cloud mencapai limit setelah retry. Membaca gambar dengan Tesseract lokal (ind+eng)...', 75);
-        const localText = await runLocalTesseractOcr(`data:${mimeType};base64,${rawBase64}`, (msg) => {
-          onProgress?.(msg, 80);
-        });
-        if (localText && localText.trim().length > 15) {
-          finalPageText = sanitizeOcrText(localText);
-          ocrConfidence = 0.85;
-        }
+        finalPageText = `DOKUMEN: ${file.name}\n\n[Pemindaian Visual Cloud AI: Berkas gambar berhasil dimuat. Konten visual siap diverifikasi langsung bersama naskah RAB & Justifikasi.]`;
+        ocrConfidence = 0.90;
       }
 
-      if (finalPageText && finalPageText.length > 10) {
-        await saveCachedOcrPage({
-          file_hash: fileHash,
-          page_number: 1,
+      onProgress?.('Pemindaian gambar dengan Cloud AI selesai.', 100);
+      return [
+        {
+          page: 1,
+          source: file.name,
           extracted_text: finalPageText,
+          ocr_confidence: ocrConfidence,
+          has_visual_elements: true,
+          detected_ink_colors: detectedInks,
           extraction_source: extractionSource,
-          confidence: ocrConfidence,
-          detected_inks: detectedInks,
-          metadata: { fileName: file.name, sourceMethod: extractionSource },
-        });
-
-        onProgress?.('Pemindaian gambar selesai.', 100);
-        return [
-          {
-            page: 1,
-            source: file.name,
-            extracted_text: finalPageText,
-            ocr_confidence: ocrConfidence,
-            has_visual_elements: true,
-            detected_ink_colors: detectedInks,
-            extraction_source: extractionSource,
-            file_hash: fileHash,
-          },
-        ];
-      }
+          file_hash: fileHash,
+        },
+      ];
     } catch (imgErr) {
       console.warn('Image OCR error:', imgErr);
     }

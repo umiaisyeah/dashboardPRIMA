@@ -38,7 +38,6 @@ import {
   importPackagesBackup,
 } from './services/storageService';
 import { Header } from './components/Header';
-import { WelcomePage } from './components/WelcomePage';
 import { UploadSection } from './components/UploadSection';
 import { VerificationProgress } from './components/VerificationProgress';
 import { DashboardView } from './components/DashboardView';
@@ -170,29 +169,6 @@ export default function App() {
       persistActivePackageId(activePackageId);
     }
   }, [activePackageId]);
-  const [currentView, setCurrentView] = useState<'welcome' | 'dashboard'>('welcome');
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('prima_dark_mode') === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      try {
-        localStorage.setItem('prima_dark_mode', 'true');
-      } catch {}
-    } else {
-      document.documentElement.classList.remove('dark');
-      try {
-        localStorage.setItem('prima_dark_mode', 'false');
-      } catch {}
-    }
-  }, [darkMode]);
-
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [selectedRawBaplPage, setSelectedRawBaplPage] = useState<number>(1);
   const [showUpload, setShowUpload] = useState<boolean>(false);
@@ -467,46 +443,22 @@ export default function App() {
     setTimeout(() => setImportNotification(null), 5000);
   };
 
-  const exceptionsCount = result?.exceptions.length || 0;
-
-  if (currentView === 'welcome') {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans antialiased transition-colors duration-200">
-        <WelcomePage
-          onEnterDashboard={() => setCurrentView('dashboard')}
-          darkMode={darkMode}
-          onToggleDarkMode={() => setDarkMode(!darkMode)}
-        />
-        {/* Modals when triggered from Welcome Page */}
-        {showUpload && (
-          <UploadSection
-            onRunVerification={handleRunPipeline}
-            onLoadGoldenCase={handleLoadGoldenCase}
-            isProcessing={isProcessing}
-            onClose={() => setShowUpload(false)}
-            existingPackageCount={packages.length}
-          />
-        )}
-      </div>
-    );
-  }
+  const highExceptionsCount =
+    result?.exceptions.filter((e) => e.priority === 'HIGH').length || 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col font-sans antialiased transition-colors duration-200">
+    <div className="min-h-screen bg-slate-100/70 text-slate-800 flex flex-col font-sans antialiased">
       {/* Primary Header with Reset Button */}
       <Header
         result={result}
-        activePackage={activePackage}
         onOpenUpload={() => setShowUpload(!showUpload)}
+        onLoadGoldenCase={handleLoadGoldenCase}
         onOpenConfig={() => setShowConfig(true)}
         onOpenReview={() => setShowReview(true)}
         onOpenReset={() => setShowReset(true)}
-        onOpenWelcome={() => setCurrentView('welcome')}
         onOpenGoogleDrive={() => setShowGoogleDriveModal(true)}
         googleUser={googleUser}
         isProcessing={isProcessing}
-        darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode(!darkMode)}
       />
 
       {/* Expandable Upload Panel */}
@@ -521,7 +473,7 @@ export default function App() {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Success / Notification Banner for Backup Restore */}
         {importNotification && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs animate-in fade-in">
@@ -667,15 +619,15 @@ export default function App() {
         {result && !isProcessing && (
           <div className="space-y-6">
             {/* Tab Bar */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-1.5 shadow-xs flex items-center gap-1 overflow-x-auto transition-colors">
+            <div className="bg-white rounded-2xl border border-slate-200 p-1.5 shadow-xs flex items-center gap-1 overflow-x-auto">
               <button
                 id="tab-dashboard"
                 type="button"
                 onClick={() => setActiveTab('dashboard')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'dashboard'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
@@ -688,13 +640,13 @@ export default function App() {
                 onClick={() => setActiveTab('technical')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'technical'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <FileCheck className="w-4 h-4" />
                 <span>Verifikasi Teknis (Approval JusTek)</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 text-slate-700">
                   {result.changes.length}
                 </span>
               </button>
@@ -705,8 +657,8 @@ export default function App() {
                 onClick={() => setActiveTab('financial')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'financial'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <Calculator className="w-4 h-4" />
@@ -724,13 +676,13 @@ export default function App() {
                 onClick={() => setActiveTab('traceability')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'traceability'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <GitCommit className="w-4 h-4" />
                 <span>Matriks Traceability</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 text-slate-700">
                   {result.traceability.length}
                 </span>
               </button>
@@ -741,13 +693,13 @@ export default function App() {
                 onClick={() => setActiveTab('evidence')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'evidence'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <FileSearch className="w-4 h-4" />
                 <span>Audit Evidence</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200/80 text-slate-700">
                   {result.evidences.length}
                 </span>
               </button>
@@ -758,15 +710,15 @@ export default function App() {
                 onClick={() => setActiveTab('exceptions')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'exceptions'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <ShieldAlert className="w-4 h-4" />
                 <span>Exceptions &amp; Temuan</span>
-                {exceptionsCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
-                    {exceptionsCount}
+                {highExceptionsCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-rose-600 text-white font-bold">
+                    {highExceptionsCount} HIGH
                   </span>
                 )}
               </button>
@@ -777,13 +729,13 @@ export default function App() {
                 onClick={() => setActiveTab('raw_bapl')}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
                   activeTab === 'raw_bapl'
-                    ? 'bg-gradient-to-r from-[#0054a6] via-[#00aded] to-[#0054a6] text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
                 <FileText className="w-4 h-4" />
                 <span>Hasil OCR &amp; Raw BAPL</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 font-bold font-mono">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-bold">
                   {result.raw_bapl.length} Hal
                 </span>
               </button>
@@ -841,17 +793,17 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 mt-12 text-center text-xs text-slate-500 dark:text-slate-400 transition-colors">
-        <div className="max-w-[1600px] mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="bg-white border-t border-slate-200 py-4 mt-12 text-center text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>
-            PRIMA (Project Records, Intelligence, Monitoring &amp; Assurance) &copy; 2026 • Air Bersih Jakarta &amp; PAM JAYA
+            Automated BAPL Verification System &copy; 2026 • Standar PMO &amp; Audit Kepatuhan Kontrak
           </p>
           <div className="flex items-center gap-4 text-[11px] text-slate-400">
-            <span>Multi-BAPL Vision Extractor</span>
+            <span>Multi-BAPL Document Extractor</span>
+            <span>•</span>
+            <span>Independent Document Pairing Engine</span>
             <span>•</span>
             <span>Deterministic Math Recalculator</span>
-            <span>•</span>
-            <span>Side-by-Side OCR Verification</span>
           </div>
         </div>
       </footer>

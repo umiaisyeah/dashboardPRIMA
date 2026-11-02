@@ -1,8 +1,6 @@
 {
-  "name": "Dashboard PRIMA",
+  "name": "Automated BAPL Verification System",
   "description": "Automated PMO document verification system for BAPL, Justifikasi Teknis, Justifikasi Finansial, RAB, BOQ/BOM, and change orders with full evidence traceability and Excel working paper generation.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

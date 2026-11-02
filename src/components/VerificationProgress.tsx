@@ -1,6 +1,5 @@
 import React from 'react';
 import { Loader2, CheckCircle2, Circle } from 'lucide-react';
-import { PrimaLogo } from './PrimaLogo';
 
 interface VerificationProgressProps {
   currentStep: number;
@@ -32,16 +31,14 @@ export const VerificationProgress: React.FC<VerificationProgressProps> = ({
     <div className="bg-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-4xl mx-auto my-8 border border-slate-800">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <PrimaLogo size="sm" animated={true} />
-          <div>
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-cyan-400">
-              Pipeline Eksekusi Otomatis PRIMA
-            </span>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
-              Langkah {currentStep} dari 10: {stepName}
-            </h3>
-          </div>
+        <div>
+          <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-400">
+            Pipeline Eksekusi Otomatis
+          </span>
+          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2 mt-0.5">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
+            Langkah {currentStep} dari 10: {stepName}
+          </h3>
         </div>
         <span className="text-xl sm:text-2xl font-black font-mono text-emerald-400">
           {percentage}%

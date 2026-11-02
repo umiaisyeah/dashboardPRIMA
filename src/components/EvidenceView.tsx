@@ -13,7 +13,11 @@ import {
   ShieldCheck,
   Stamp,
   Layers,
+  FileCheck,
+  Building2,
   Tag,
+  AlertCircle,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { EvidenceRecord } from '../types';
 import { StatusBadge } from './TechnicalVerificationView';
@@ -72,18 +76,18 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
   return (
     <div className="space-y-6">
       {/* Header & Controls */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs transition-colors">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <span className="p-2 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
+              <span className="p-2 rounded-xl bg-purple-100 text-purple-700">
                 <FileSearch className="w-5 h-5" />
               </span>
               <div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
                   Daftar Bukti Lengkap &amp; Transkrip Evidence Lapangan
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500">
                   Kutipan komprehensif, klausul transkrip BAPL, spesifikasi teknis teruji fisik, dan rantai legalitas pengesahan.
                 </p>
               </div>
@@ -92,14 +96,14 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
             {/* Filter Tabs */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs">
               <button
                 type="button"
                 onClick={() => setActiveFilter('ALL')}
                 className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   activeFilter === 'ALL'
-                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white text-slate-900 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Semua ({evidences.length})
@@ -109,8 +113,8 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
                 onClick={() => setActiveFilter('BAPL')}
                 className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   activeFilter === 'BAPL'
-                    ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-cyan-300 shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white text-blue-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 BAPL Lapangan ({countBapl})
@@ -120,8 +124,8 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
                 onClick={() => setActiveFilter('MCO')}
                 className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   activeFilter === 'MCO'
-                    ? 'bg-white dark:bg-slate-700 text-indigo-700 dark:text-indigo-300 shadow-2xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-white text-indigo-700 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 MC-0 / DED ({countMco})
@@ -132,8 +136,8 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
                   onClick={() => setActiveFilter('TestReport')}
                   className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                     activeFilter === 'TestReport'
-                      ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-2xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-white text-emerald-700 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   Uji Teknis ({countTest})
@@ -149,7 +153,7 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
                 placeholder="Cari kata kunci bukti..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-hidden focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 w-full sm:w-56"
+                className="pl-8 pr-3 py-1.5 rounded-xl text-xs bg-slate-50 border border-slate-200 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 w-full sm:w-56"
               />
             </div>
           </div>
@@ -165,35 +169,35 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
           return (
             <div
               key={`${ev.evidence_id}_${idx}`}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-all space-y-4"
+              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:border-slate-300 transition-all space-y-4"
             >
               {/* Top Meta Bar */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300 border border-purple-200 dark:border-purple-800 flex items-center gap-1.5">
-                    <FileSearch className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
+                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-purple-100 text-purple-900 border border-purple-200 flex items-center gap-1.5">
+                    <FileSearch className="w-3.5 h-3.5 text-purple-700" />
                     {ev.evidence_id}
                   </span>
-                  <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  <span className="font-mono text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200">
                     {ev.change_id}
                   </span>
                   {ev.item_name && (
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    <span className="text-xs font-bold text-slate-900">
                       {ev.item_name}
                     </span>
                   )}
                   {ev.evidence_type === 'EXPLICIT' && (
-                    <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                    <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                       BUKTI EKSPLISIT
                     </span>
                   )}
                   {ev.evidence_type === 'IMPLICIT' && (
-                    <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                    <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
                       BUKTI IMPLISIT
                     </span>
                   )}
                   {ev.doc_type && (
-                    <span className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                    <span className="px-2 py-0.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
                       {ev.doc_type}
                     </span>
                   )}
@@ -204,13 +208,13 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
                   <button
                     type="button"
                     onClick={() => handleCopyEvidence(ev)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
                     title="Salin ringkasan bukti lengkap"
                   >
                     {isCopied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                        <span className="text-emerald-700 dark:text-emerald-300 font-semibold">Tersalin!</span>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700 font-semibold">Tersalin!</span>
                       </>
                     ) : (
                       <>
@@ -224,19 +228,19 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
 
               {/* Sub-Header: Clause Title & Origin */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200">
-                  <Tag className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <div className="flex items-center gap-2 font-bold text-slate-800">
+                  <Tag className="w-4 h-4 text-indigo-600" />
                   <span>{ev.clause_title || 'Hasil Pemeriksaan Opname Fisik & Pengujian'}</span>
                 </div>
-                <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400 text-[11px]">
-                  <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-3 text-slate-500 text-[11px]">
+                  <span className="flex items-center gap-1 font-medium text-slate-700">
                     <FileText className="w-3.5 h-3.5 text-slate-400" />
                     {ev.document} (Hal {ev.page})
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
+                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">
                     Metode: {ev.source_type}
                   </span>
-                  <span className="font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                  <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                     Akurasi OCR: {Math.round(ev.confidence * 100)}%
                   </span>
                 </div>
@@ -270,18 +274,18 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
 
               {/* Verified Sub-Specifications & Fact Badges */}
               {ev.verified_specs && ev.verified_specs.length > 0 && (
-                <div className="p-3.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/80 space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950 dark:text-blue-200">
-                    <ShieldCheck className="w-4 h-4 text-blue-700 dark:text-cyan-400" />
+                <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-blue-950">
+                    <ShieldCheck className="w-4 h-4 text-blue-700" />
                     <span>Rincian Sub-Spesifikasi &amp; Parameter Fisik Terverifikasi:</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                     {ev.verified_specs.map((spec, sIdx) => (
                       <div
                         key={sIdx}
-                        className="bg-white dark:bg-slate-800/90 p-2.5 rounded-lg border border-blue-200/60 dark:border-blue-900/50 text-slate-800 dark:text-slate-200 flex items-start gap-2 shadow-2xs"
+                        className="bg-white p-2.5 rounded-lg border border-blue-200/60 text-slate-800 flex items-start gap-2 shadow-2xs"
                       >
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
                         <span className="text-[11px] leading-snug">
                           <HighlightedText text={spec} matchTarget={[ev.snippet, ev.item_name || '']} />
                         </span>
@@ -293,12 +297,12 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
 
               {/* Implicit Correlation Note (if applicable) */}
               {ev.implicit_correlation_note && (
-                <div className="p-3.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs space-y-1">
-                  <div className="flex items-center gap-1.5 font-bold text-purple-950 dark:text-purple-200">
-                    <Layers className="w-4 h-4 text-purple-700 dark:text-purple-400" />
+                <div className="p-3.5 rounded-xl bg-purple-50/70 border border-purple-200 text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-purple-950">
+                    <Layers className="w-4 h-4 text-purple-700" />
                     <span>Korelasi Logika Teknis &amp; Finansial:</span>
                   </div>
-                  <p className="text-[11px] text-purple-900 dark:text-purple-300 leading-relaxed">
+                  <p className="text-[11px] text-purple-900 leading-relaxed">
                     <HighlightedText
                       text={ev.implicit_correlation_note}
                       matchTarget={[ev.item_name || '', ev.snippet, ...(ev.verified_specs || [])]}
@@ -309,24 +313,24 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
 
               {/* Full Context Section (Collapsible) */}
               {ev.full_clause && ev.full_clause !== ev.snippet && (
-                <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
                   <button
                     type="button"
                     onClick={() => toggleContext(ev.evidence_id)}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-slate-50 hover:bg-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
                   >
                     <span className="flex items-center gap-1.5">
-                      <FileText className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <FileText className="w-4 h-4 text-slate-500" />
                       {isExpanded ? 'Sembunyikan Konteks Lengkap Halaman' : 'Lihat Konteks Transkrip Paragraf Lengkap'}
                     </span>
                     {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <ChevronUp className="w-4 h-4 text-slate-500" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <ChevronDown className="w-4 h-4 text-slate-500" />
                     )}
                   </button>
                   {isExpanded && (
-                    <div className="p-4 bg-white dark:bg-slate-950 text-xs font-mono text-slate-700 dark:text-slate-300 whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed border-t border-slate-200 dark:border-slate-800">
+                    <div className="p-4 bg-white text-xs font-mono text-slate-700 whitespace-pre-wrap max-h-60 overflow-y-auto leading-relaxed border-t border-slate-200">
                       <HighlightedText
                         text={ev.full_clause}
                         matchTarget={[ev.item_name || '', ev.snippet, ...(ev.verified_specs || [])]}
@@ -337,14 +341,14 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
               )}
 
               {/* Authenticity Seals & Actions Bar */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
                 <div className="flex flex-wrap items-center gap-2">
                   {ev.authenticity_indicators && ev.authenticity_indicators.map((auth, aIdx) => (
                     <span
                       key={aIdx}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
                     >
-                      <Stamp className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                      <Stamp className="w-3 h-3 text-slate-500" />
                       {auth}
                     </span>
                   ))}
@@ -354,7 +358,7 @@ ${ev.implicit_correlation_note ? `\nKorelasi Teknis: ${ev.implicit_correlation_n
                   <button
                     type="button"
                     onClick={() => onViewRawBapl(ev.page)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800 transition-colors self-end sm:self-auto cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors self-end sm:self-auto cursor-pointer"
                   >
                     <span>Buka Transkrip Hal {ev.page}</span>
                     <ExternalLink className="w-3.5 h-3.5" />

@@ -165,7 +165,7 @@ export const HighlightedText: React.FC<HighlightedTextProps> = ({
           return (
             <mark
               key={i}
-              className="bg-amber-200/90 text-amber-950 font-bold px-1 py-0.2 rounded border border-amber-300 dark:bg-amber-400/25 dark:text-amber-200 dark:border-amber-400/40"
+              className="bg-amber-200/90 text-amber-950 font-bold px-1 py-0.2 rounded border border-amber-300"
               title="Sesuai & Cocok dengan Klausul Dokumen"
             >
               {part}

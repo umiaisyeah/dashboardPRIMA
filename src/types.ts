@@ -58,7 +58,6 @@ export interface ProjectIdentity {
   date: string;
   revision: string;
   packageContractInfo: string;
-  contractNumber?: string;
   // Comparison against Excel
   excelProjectCode?: string;
   excelPoNumber?: string;
@@ -290,11 +289,6 @@ export interface ExceptionRecord {
     source_name: string;
     page_or_sheet?: string | number;
     quoted_text?: string;
-  };
-  comparison_values?: {
-    bapl_ocr_value: string;
-    justek_jusfin_value: string;
-    difference_note: string;
   };
 }
 
